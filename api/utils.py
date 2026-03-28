@@ -28,7 +28,7 @@ def load_data(region, parameter):
 
         year = int(col[0])
 
-        # -------- MONTH DATA --------
+        #MONTH DATA
         for i in range(12):
             value = col[i+1]
 
@@ -46,7 +46,7 @@ def load_data(region, parameter):
                 temprature=temp
             )
 
-        # -------- SEASON DATA --------
+        #SEASON DATA
         for i in range(5):
             value = col[13+i]
 
@@ -63,7 +63,7 @@ def load_data(region, parameter):
                 temprature=temp
             )
 
-        # -------- ANNUAL DATA --------
+        #ANNUAL DATA 
         for i in range(1):
             annual_value = col[17+i]
 
