@@ -4,7 +4,7 @@ from .serializers import MonthlySerializer,SeasonalSerializer,AnnualSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Q
-from .utils import load_data
+from .utils import load_data, get_monthly_filtered_data, get_seasonal_filtered_data, get_annual_filtered_data
 
 region=["UK","England","Scotland","Wales","Northern Ireland","England & Wales"]
 parameter=["Tmax","Tmin","Sunshine","Rainfall"]
@@ -35,20 +35,7 @@ class MonthlyView(APIView):
         region = request.GET.get('region')
         month = request.GET.get('month')
 
-        if year:
-            data=data.filter(year=year)
-            print("After year filter:", data.count())
-
-        if region:
-            data=data.filter(region=region)
-            print("After region filter:", data.count())
-
-        if parameter:
-            data=data.filter(parameter=parameter)
-
-        if month:
-            data = data.filter(month=month)
-       
+        data = get_monthly_filtered_data(year,parameter,region,month)
 
         serializer=MonthlySerializer(data,many=True)
 
@@ -65,21 +52,10 @@ class SeasonalView(APIView):
         parameter=request.GET.get('parameter')
         region=request.GET.get('region')
         season=request.GET.get('season')
+ 
 
-        if year:
-            data = data.filter(year=year)
+        data = get_seasonal_filtered_data(year,parameter,region,season)
 
-        if region:
-            data = data.filter(region=region)
-
-        if season :
-            data = data.filter(season=season)
-
-        if parameter:
-            data = data.filter(parameter=parameter)
-            
-        
-       
         # if year and season:
         #     data = data.filter(year=year,season=season)
 
@@ -105,17 +81,9 @@ class AnnualView(APIView):
         year = request.GET.get('year')
         parameter = request.GET.get('parameter')
         region = request.GET.get('region')
+        sort = request.GET.get('sort')
 
-        if year:
-            data = data.filter(year=year)
-        
-        if region:
-            data = data.filter(region=region)
-
-        if parameter:
-            data = data.filter(parameter=parameter)
-       
-
+        data = get_annual_filtered_data(year,parameter,region,sort)
 
         serializer=AnnualSerializer(data,many=True)
 

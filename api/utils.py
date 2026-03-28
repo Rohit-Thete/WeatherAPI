@@ -82,3 +82,60 @@ def load_data(region, parameter):
             )
 
     print("Data stored successfully")
+
+
+
+def get_monthly_filtered_data(year=None,parameter=None,region=None,month=None):
+        
+    data = MonthlyData.objects.all()
+    if year:
+        data = data.filter(year=year)
+
+    if parameter:
+        data = data.filter(parameter=parameter)
+
+    if region:
+        data = data.filter(region=region)
+        
+    if month:
+        data = data.filter(month=month)
+
+        return data
+
+
+def get_seasonal_filtered_data(year=None,parameter=None,region=None,season=None):
+   
+    data = SeasonalData.objects.all()
+
+    if year:
+        data = data.filter(year=year)
+
+    if parameter:
+        data = data.filter(parameter=parameter)
+
+    if region:
+        data = data.filter(region=region)
+
+    if season:
+        data = data.filter(season=season)
+
+        return data
+    
+def get_annual_filtered_data(year=None,parameter=None,region=None,sort=None):
+
+    data = AnnualData.objects.all()
+
+    if year:
+        data = data.filter(year = year)
+
+    if parameter:
+        data = data.filter(parameter=parameter)
+
+    if region:
+        data = data.filter(region = region)
+
+    if sort:
+        data = data.order_by('sort')
+
+        return data
+    
