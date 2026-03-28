@@ -19,7 +19,7 @@ def load_data(region, parameter):
 
         col = line.split()
 
-        # skip invalid rows
+        #invalid rows
         if len(col) < 13:
             continue
 
