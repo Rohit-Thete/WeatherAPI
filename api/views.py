@@ -4,7 +4,7 @@ from .serializers import MonthlySerializer,SeasonalSerializer,AnnualSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Q
-from .utils import load_data, get_monthly_filtered_data, get_seasonal_filtered_data, get_annual_filtered_data
+from .utils import load_data
 
 region=["UK","England","Scotland","Wales","Northern Ireland","England & Wales"]
 parameter=["Tmax","Tmin","Sunshine","Rainfall"]
@@ -29,13 +29,25 @@ if MonthlyData.objects.count() == 0 and SeasonalData.objects.count() == 0 and An
 class MonthlyView(APIView):
     def get(self,request):
 
+        data = MonthlyData.objects.all()
         year = request.GET.get('year')
         parameter=request.GET.get('parameter')
         region = request.GET.get('region')
         month = request.GET.get('month')
 
-        data = get_monthly_filtered_data(year,parameter,region,month)
+           
+        if year:
+            data = data.filter(year=year)
 
+        if parameter:
+            data = data.filter(parameter=parameter)
+
+        if region:
+            data = data.filter(region=region)
+            
+        if month:
+            data = data.filter(month=month)
+   
         serializer=MonthlySerializer(data,many=True)
 
         return Response(serializer.data)
@@ -43,17 +55,24 @@ class MonthlyView(APIView):
 class SeasonalView(APIView):
     def get(self,request):
        
-
-        abc = SeasonalData.objects.values_list('region',flat=True).distinct()
-        print(abc)
+        data = SeasonalData.objects.all()
 
         year=request.GET.get('year')
         parameter=request.GET.get('parameter')
         region=request.GET.get('region')
         season=request.GET.get('season')
- 
 
-        data = get_seasonal_filtered_data(year,parameter,region,season)
+        if year:
+            data = data.filter(year=int(year))
+
+        if parameter:
+            data = data.filter(parameter=str(parameter))
+
+        if region:
+            data = data.filter(region=str(region))
+
+        if season:
+            data = data.filter(season=str(season))
 
         # if year and season:
         #     data = data.filter(year=year,season=season)
@@ -75,13 +94,23 @@ class SeasonalView(APIView):
 
 class AnnualView(APIView):
     def get(self,request):
-        
+        data = AnnualData.objects.all()
         year = request.GET.get('year')
         parameter = request.GET.get('parameter')
         region = request.GET.get('region')
         sort = request.GET.get('sort')
 
-        data = get_annual_filtered_data(year,parameter,region,sort)
+        if year:
+            data = data.filter(year = year)
+
+        if parameter:
+            data = data.filter(parameter=parameter)
+
+        if region:
+            data = data.filter(region = region)
+
+        if sort:
+            data = data.order_by(sort)
 
         serializer=AnnualSerializer(data,many=True)
 
