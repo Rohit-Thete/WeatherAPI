@@ -135,7 +135,7 @@ def get_annual_filtered_data(year=None,parameter=None,region=None,sort=None):
         data = data.filter(region = region)
 
     if sort:
-        data = data.order_by('sort')
+        data = data.order_by(sort)
 
         return data
     
