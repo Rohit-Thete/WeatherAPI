@@ -28,7 +28,6 @@ if MonthlyData.objects.count() == 0 and SeasonalData.objects.count() == 0 and An
 
 class MonthlyView(APIView):
     def get(self,request):
-        data = MonthlyData.objects.all()
 
         year = request.GET.get('year')
         parameter=request.GET.get('parameter')
@@ -43,7 +42,7 @@ class MonthlyView(APIView):
     
 class SeasonalView(APIView):
     def get(self,request):
-        data = SeasonalData.objects.all()
+       
 
         abc = SeasonalData.objects.values_list('region',flat=True).distinct()
         print(abc)
@@ -76,8 +75,7 @@ class SeasonalView(APIView):
 
 class AnnualView(APIView):
     def get(self,request):
-        data = AnnualData.objects.all()
-
+        
         year = request.GET.get('year')
         parameter = request.GET.get('parameter')
         region = request.GET.get('region')
