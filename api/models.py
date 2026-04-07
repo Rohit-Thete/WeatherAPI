@@ -20,7 +20,7 @@ class Unit(models.Model):
     
 class Parameter(models.Model):
     name = models.CharField(max_length=50,unique=True)
-    unit = models.ForeignKey(Unit,on_delete=models.CASCADE)
+    unit = models.ForeignKey(Unit,on_delete=models.CASCADE,related_name="%(class)s")
 
     def __str__(self):
         return f'{self.name} - {self.unit}'
@@ -37,7 +37,7 @@ class WeatherData(models.Model):
 
     class Meta:
         abstract = True
-        ordering=["year"]
+        ordering=["-year"]
 
 
 class MonthlyData(WeatherData):
@@ -45,10 +45,15 @@ class MonthlyData(WeatherData):
     month=models.CharField(max_length=100,choices=MONTH_CHOICES,null=False)
    
     def __str__(self):
-        return f'{self.year} - {self.month}'
+        return f'{self.year} - {self.month} - {self.region} - {self.parameter} - {self.value}'
     
     class Meta:
-        unique_together=["year","region","month","parameter","value"]
+       constraints = [
+            models.UniqueConstraint(
+                fields=["year","region","parameter","month"],
+                name="unique_monthly_data"
+            )
+        ]
 
   
     
@@ -57,17 +62,28 @@ class SeasonalData(WeatherData):
     season=models.CharField(max_length=50,choices=SEASON_CHOICES,null=False)
    
     def __str__(self):
-        return f'{self.year} - {self.season}'
+        return f'{self.year} - {self.season} - {self.region} - {self.parameter} - {self.value}'
     
     class Meta:
-        unique_together=["year","region","season","parameter","value"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["year","region","parameter","season"],
+                name="unique_seasonal_data"
+            )
+        ]
+
     
     
 class AnnualData(WeatherData):
    
    
    def __str__(self):
-       return f'{self.year} - {self.region}'
+       return f'{self.year} - {self.region} - {self.parameter} - {self.value}'
    
    class Meta:
-        unique_together=["year","season","parameter","value"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["year","region","parameter"],
+                name="unique_annual_data"
+            )
+        ]
