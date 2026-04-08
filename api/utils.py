@@ -33,7 +33,7 @@ def load_data(region_name, parameter_name):
             continue
 
         year_value = int(col[0])
-        year,_=Year.objects.get_or_create(year = year_value)
+        year,_ =Year.objects.get_or_create(year = year_value)
 
 
 
