@@ -1,12 +1,12 @@
 MONTH_CHOICES =[
-    ("Jan","January"),("Feb","February"),("Mar","March"),
-    ("Apr","April"),("May","May"),("Jun","June"),
-    ("Jul","July"),("Aug","August"),("Sep","September"),
-    ("Oct","October"),("Nov","November"),("Dec","December")]
+    ("jan","jan"),("feb","feb"),("mar","mar"),
+    ("apr","apr"),("may","may"),("jun","jun"),
+    ("jul","jul"),("aug","aug"),("sep","sep"),
+    ("oct","oct"),("nov","nov"),("dec","dec")]
 
 
 
-SEASON_CHOICES=[("Win","Winter"),("Spr","Spring"),("Sum","Summer"),("Aut","Autumn")]
+SEASON_CHOICES=[("win","Winter"),("spr","Spring"),("sum","Summer"),("aut","Autumn")]
 
 
 
