@@ -52,6 +52,7 @@ class MonthlyData(WeatherData):
         return f'{self.year} - {self.month} - {self.region} - {self.parameter} - {self.value}'
     
     class Meta:
+       ordering=["-year"]
        constraints = [
             models.UniqueConstraint(
                 fields=["year","region","parameter","month"],
@@ -69,6 +70,7 @@ class SeasonalData(WeatherData):
         return f'{self.year} - {self.season} - {self.region} - {self.parameter} - {self.value}'
     
     class Meta:
+        ordering=["-year"]
         constraints = [
             models.UniqueConstraint(
                 fields=["year","region","parameter","season"],
@@ -85,6 +87,7 @@ class AnnualData(WeatherData):
        return f'{self.year} - {self.region} - {self.parameter} - {self.value}'
    
    class Meta:
+        ordering=["-year"]
         constraints = [
             models.UniqueConstraint(
                 fields=["year","region","parameter"],
