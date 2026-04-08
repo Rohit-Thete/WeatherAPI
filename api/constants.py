@@ -20,6 +20,13 @@ PARAMETER_UNITS = {
     "AirFrost": "days",
 }
 
+PARAMETER_CHOICES=[("Tmax","Tmax"),("Tmin","Tmin"),("Tmean","Tmean"),("Rainfall","Rainfall"),("Sunshine","Sunshine"),
+                   ("Raindays1mm","Raindays1mm"),("AirFrost","AirFrost")]
+
+UNITS=[("°C","°C"),("mm","mm"),("hours","hours"),("days","days")]
+
+
+
 MONTHS = ["jan", "feb", "mar", "apr", "may", "jun",
           "jul", "aug", "sep", "oct", "nov", "dec"]
 

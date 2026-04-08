@@ -1,10 +1,13 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from api.constants import MONTH_CHOICES,SEASON_CHOICES
+from api.constants import MONTH_CHOICES,SEASON_CHOICES,PARAMETER_CHOICES,UNITS
 
 
 class Year(models.Model):
     year = models.IntegerField(validators=[MinValueValidator(1000),MaxValueValidator(9999)],null=False)
+
+    class Meta:
+        ordering = ["-year"]
 
 class Region(models.Model):
     name = models.CharField(max_length=50,unique=True)
@@ -17,13 +20,13 @@ class Region(models.Model):
 
 
 class Unit(models.Model):
-    name = models.CharField(max_length=20,unique=True)
+    name = models.CharField(max_length=20,unique=True,choices=UNITS)
 
     def __str__(self):
         return self.name
     
 class Parameter(models.Model):
-    name = models.CharField(max_length=50,unique=True)
+    name = models.CharField(max_length=50,unique=True,choices=PARAMETER_CHOICES)
     unit = models.ForeignKey(Unit,on_delete=models.CASCADE,related_name="%(class)s")
 
     def __str__(self):
@@ -37,7 +40,7 @@ class WeatherData(models.Model):
     year = models.ForeignKey(Year,on_delete=models.CASCADE,related_name='%(class)s',null=False)
     region = models.ForeignKey(Region,on_delete=models.CASCADE,related_name='%(class)s',null=False)
     parameter = models.ForeignKey(Parameter,on_delete=models.CASCADE,related_name='%(class)s',null=False)
-    value = models.FloatField()
+    value = models.FloatField(null=False)
 
     class Meta:
         abstract = True
@@ -52,6 +55,7 @@ class MonthlyData(WeatherData):
         return f'{self.year} - {self.month} - {self.region} - {self.parameter} - {self.value}'
     
     class Meta:
+       ordering = ["-year"]
        constraints = [
             models.UniqueConstraint(
                 fields=["year","region","parameter","month"],
@@ -69,6 +73,7 @@ class SeasonalData(WeatherData):
         return f'{self.year} - {self.season} - {self.region} - {self.parameter} - {self.value}'
     
     class Meta:
+        ordering =["-year"]
         constraints = [
             models.UniqueConstraint(
                 fields=["year","region","parameter","season"],
@@ -85,6 +90,7 @@ class AnnualData(WeatherData):
        return f'{self.year} - {self.region} - {self.parameter} - {self.value}'
    
    class Meta:
+        ordering =["-year"]
         constraints = [
             models.UniqueConstraint(
                 fields=["year","region","parameter"],
