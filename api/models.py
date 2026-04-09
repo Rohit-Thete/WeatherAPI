@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from api.constants import MONTH_CHOICES,SEASON_CHOICES,UNIT_CHOICES
+from api.constants import MONTH_CHOICES,SEASON_CHOICES,UNIT_CHOICES,PARAMETER_CHOICES
 
 
 class Year(models.Model):
