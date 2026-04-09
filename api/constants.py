@@ -6,7 +6,7 @@ MONTH_CHOICES =[
 
 
 
-SEASON_CHOICES=[("win","Winter"),("spr","Spring"),("sum","Summer"),("aut","Autumn")]
+SEASON_CHOICES=[("winter","Winter"),("spring","Spring"),("summer","Summer"),("autumn","Autumn")]
 
 
 
@@ -24,10 +24,20 @@ PARAMETER_UNITS = {
     "Snowfall": "mm",
 }
 
-MONTHS = ["jan", "feb", "mar", "apr", "may", "jun",
-          "jul", "aug", "sep", "oct", "nov", "dec"]
+PARAMETER_CHOICES=[("Tmax","Tmax"),("Tmin","Tmin"),
+                   ("Tmean","Tmean"),("Rainfall","Rainfall"),
+                   ("Sunshine","Sunshine"),("Raindays1mm","Raindays1mm"),
+                   ("AirFrost","AirFrost"),("Humidity","Humidity"),
+                   ("Windspeed","Windspeed"),("Pressure","Pressure"),
+                   ("Snowfall","Snowfall")]
 
-SEASONS = ["win", "spr", "sum", "aut"]
+
+
+
+MONTHS = ["january", "february", "march", "april", "may", "june",
+          "july", "august", "september", "october", "november", "december"]
+
+SEASONS = ["winter", "spring", "summer", "autumn"]
 
 UNIT_CHOICES=[("celcius","°C"),("mm","mm"),("hours","hours"),
               ("days","days"),("percent","percent"),("meters_per_second","meters_per_second"),

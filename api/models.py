@@ -6,6 +6,9 @@ from api.constants import MONTH_CHOICES,SEASON_CHOICES,UNIT_CHOICES,PARAMETER_CH
 class Year(models.Model):
     year = models.IntegerField(validators=[MinValueValidator(1000),MaxValueValidator(9999)],null=False)
 
+    class Meta:
+        ordering = ["-year"]
+
 class Region(models.Model):
     name = models.CharField(max_length=50,unique=True)
 
@@ -23,8 +26,8 @@ class Unit(models.Model):
         return self.name
     
 class Parameter(models.Model):
-    name = models.CharField(max_length=50,unique=True)
-    unit = models.ForeignKey(Unit,on_delete=models.CASCADE)
+    name = models.CharField(max_length=50,unique=True,choices=PARAMETER_CHOICES)
+    unit = models.ForeignKey(Unit,on_delete=models.CASCADE,related_name="%(class)s")
 
     def __str__(self):
         return f'{self.name} - {self.unit}'
