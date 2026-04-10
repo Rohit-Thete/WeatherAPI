@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .utils import load_data
 from rest_framework import status
-from .constants import PARAMETER_CHOICES,SEASON_CHOICES,MONTH_CHOICES,UNITS,PARAMETER_UNITS
+from .constants import PARAMETER_CHOICES,SEASON_CHOICES,PARAMETER_UNITS
 
 REGIONS = ["UK", "England", "Scotland", "Wales", "Northern_Ireland", "England_and_Wales"]
 PARAMETERS = ["Tmax", "Tmin", "Sunshine", "Rainfall"]

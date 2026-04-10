@@ -18,7 +18,7 @@ PARAMETER_UNITS = {
     "Sunshine": "hours",
     "Raindays1mm": "days",
     "AirFrost": "days",
-    "Humidity": "percent    ",
+    "Humidity": "percent",
     "WindSpeed": "meters_per_second",
     "Pressure": "hPa",
     "Snowfall": "mm",
