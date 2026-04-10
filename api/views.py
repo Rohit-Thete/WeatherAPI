@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import MonthlyData, SeasonalData, AnnualData,Unit,Year,Parameter,Region
-from .serializers import MonthlySerializer, SeasonalSerializer, AnnualSerializer, monthlyWriteSerializer
+from .serializers import MonthlySerializer, SeasonalSerializer, AnnualSerializer, monthlyWriteSerializer, SeasonalWriteSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .utils import load_data
@@ -120,12 +120,13 @@ class SeasonalView(APIView):
     
 
     def post(self,request):
-        data = request.data
-        year_value = data.get("year")
-        region_value = data.get("region")
-        season_value = data.get("season")
-        parameter_name = data.get("parameter")
-        value = data.get("value")
+        serializer = SeasonalWriteSerializer(data = request.data)
+        if not serializer.is_valid():
+            return Response(status=404)
+        
+        obj = serializer.save()
+
+        return Response(SeasonalSerializer(obj).data, status=201)
 
         valid_season = [s[0] for s in SEASON_CHOICES]
         if season_value not in valid_season:

@@ -1,6 +1,6 @@
 import requests
-from .models import MonthlyData, SeasonalData, AnnualData, Region, Parameter,Unit,Year
-from .constants import PARAMETER_UNITS,SEASONS,MONTHS,MONTH_CHOICES
+from .models import MonthlyData, SeasonalData, AnnualData, Region, Parameter,Unit
+from .constants import PARAMETER_UNITS,SEASONS,MONTHS
 
 
 
@@ -32,11 +32,8 @@ def load_data(region_name, parameter_name):
         if not col[0].isdigit():
             continue
 
-        year_value = int(col[0])
-        year,_ =Year.objects.get_or_create(year = year_value)
-
-
-
+        year = int(col[0])
+        
 
         # MONTHLY DATA
         for i in range(12):
