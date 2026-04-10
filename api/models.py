@@ -3,12 +3,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from api.constants import MONTH_CHOICES,SEASON_CHOICES,UNIT_CHOICES,PARAMETER_CHOICES
 
 
-class Year(models.Model):
-    year = models.IntegerField(validators=[MinValueValidator(1000),MaxValueValidator(9999)],null=False)
-
-    class Meta:
-        ordering = ["-year"]
-
 class Region(models.Model):
     name = models.CharField(max_length=50,unique=True)
 
@@ -37,7 +31,7 @@ class Parameter(models.Model):
 
 
 class WeatherData(models.Model):
-    year = models.ForeignKey(Year,on_delete=models.CASCADE,null=False,related_name='%(class)s')
+    year = models.IntegerField(validators=[MaxValueValidator(1000),MinValueValidator(9999)])
     region = models.ForeignKey(Region,on_delete=models.CASCADE,null=False,related_name='%(class)s')
     parameter = models.ForeignKey(Parameter,on_delete=models.CASCADE,null=False,related_name='%(class)s')
     value = models.FloatField(null=False)
