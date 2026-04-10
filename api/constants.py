@@ -1,34 +1,45 @@
 MONTH_CHOICES =[
-    ("Jan","January"),("Feb","February"),("Mar","March"),
-    ("Apr","April"),("May","May"),("Jun","June"),
-    ("Jul","July"),("Aug","August"),("Sep","September"),
-    ("Oct","October"),("Nov","November"),("Dec","December")]
+    ("january","january"),("february","february"),("march","march"),
+    ("april","april"),("may","may"),("june","june"),
+    ("july","july"),("august","august"),("september","september"),
+    ("october","october"),("november","november"),("december","december")]
 
 
 
-SEASON_CHOICES=[("Win","Winter"),("Spr","Spring"),("Sum","Summer"),("Aut","Autumn")]
+SEASON_CHOICES=[("winter","Winter"),("spring","Spring"),("summer","Summer"),("autumn","Autumn")]
 
 
 
 PARAMETER_UNITS = {
-    "Tmax": "°C",
-    "Tmin": "°C",
-    "Tmean": "°C",
+    "Tmax": "celsius",
+    "Tmin": "celsius",
+    "Tmean": "celsius",
     "Rainfall": "mm",
     "Sunshine": "hours",
     "Raindays1mm": "days",
     "AirFrost": "days",
+    "Humidity": "percent    ",
+    "WindSpeed": "meters_per_second",
+    "Pressure": "hPa",
+    "Snowfall": "mm",
 }
 
-PARAMETER_CHOICES=[("Tmax","Tmax"),("Tmin","Tmin"),("Tmean","Tmean"),("Rainfall","Rainfall"),("Sunshine","Sunshine"),
-                   ("Raindays1mm","Raindays1mm"),("AirFrost","AirFrost")]
+PARAMETER_CHOICES=[("Tmax","Tmax"),("Tmin","Tmin"),
+                   ("Tmean","Tmean"),("Rainfall","Rainfall"),
+                   ("Sunshine","Sunshine"),("Raindays1mm","Raindays1mm"),
+                   ("AirFrost","AirFrost"),("Humidity","Humidity"),
+                   ("Windspeed","Windspeed"),("Pressure","Pressure"),
+                   ("Snowfall","Snowfall")]
 
-UNITS=[("°C","°C"),("mm","mm"),("hours","hours"),("days","days")]
 
 
 
-MONTHS = ["jan", "feb", "mar", "apr", "may", "jun",
-          "jul", "aug", "sep", "oct", "nov", "dec"]
+MONTHS = ["january", "february", "march", "april", "may", "june",
+          "july", "august", "september", "october", "november", "december"]
 
-SEASONS = ["win", "spr", "sum", "aut"]
+SEASONS = ["winter", "spring", "summer", "autumn"]
+
+UNIT_CHOICES=[("celcius","°C"),("mm","mm"),("hours","hours"),
+              ("days","days"),("percent","percent"),("meters_per_second","meters_per_second"),
+              ("hpa","hpa",)]
    

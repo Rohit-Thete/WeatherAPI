@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import MonthlyData, SeasonalData, AnnualData,Unit,Year,Parameter,Region
-from .serializers import MonthlySerializer, SeasonalSerializer, AnnualSerializer
+from .serializers import MonthlySerializer, SeasonalSerializer, AnnualSerializer, monthlyWriteSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .utils import load_data
@@ -46,57 +46,60 @@ class MonthlyView(APIView):
         return Response(serializer)
     
     def post(self,request):
-        data = request.data 
-        year_value =data.get("year")
-        month_value = data.get("month")
-        region_value = data.get("region")
-        parameter_name = data.get("parameter")
-        value = data.get("value")
-
-        if not all(["year","month","region","parameter","value"]):
-            return Response ("All values are required")
+        serializer = monthlyWriteSerializer(data=request.data) 
+        if not serializer.is_valid():
+            return Response(serializer.errors,status=404 )
+           
+        obj = serializer.save()
+        return Response(MonthlySerializer(obj).data,status=201)
         
-        valid_parameters =[p[0] for p in PARAMETER_CHOICES]
-        if parameter_name not in valid_parameters:
-            return Response("Enter valid Parameter")
+        # year_value =data.get("year")
+        # month_value = data.get("month")
+        # region_value = data.get("region")
+        # parameter_name = data.get("parameter")
+        # value = data.get("value")
+
+        # if not all(["year","month","region","parameter","value"]):
+        #     return Response ("All values are required")
         
-        valid_months =[m[0] for m in MONTH_CHOICES]
-        if month_value not in valid_months:
-            return Response("Invalid Month")
+        # valid_parameters =[p[0] for p in PARAMETER_CHOICES]
+        # if parameter_name not in valid_parameters:
+        #     return Response("Enter valid Parameter")
+        
+        # valid_months =[m[0] for m in MONTH_CHOICES]
+        # if month_value not in valid_months:
+        #     return Response("Invalid Month")
         
 
-        unit_name = PARAMETER_UNITS.get(parameter_name)
+        # unit_name = PARAMETER_UNITS.get(parameter_name)
 
-        unit_obj,_ = Unit.objects.get_or_create(name = unit_name)
+        # unit_obj,_ = Unit.objects.get_or_create(name = unit_name)
 
-        parameter_obj,c = Parameter.objects.get_or_create(name = parameter_name,defaults={"unit":unit_obj})
+        # parameter_obj,c = Parameter.objects.get_or_create(name = parameter_name,defaults={"unit":unit_obj})
 
-        if not c and parameter_obj.unit != unit_obj:
-            parameter_obj.unit=unit_obj
-            parameter_obj.save()
+        # if not c and parameter_obj.unit != unit_obj:
+        #     parameter_obj.unit=unit_obj
+        #     parameter_obj.save()
 
-        year_obj, _ = Year.objects.get_or_create(year = year_value)
-        region_obj, _ = Region.objects.get_or_create(name=region_value)
+        # year_obj, _ = Year.objects.get_or_create(year = year_value)
+        # region_obj, _ = Region.objects.get_or_create(name=region_value)
 
-        if value is not None:
-            obj,created = MonthlyData.objects.get_or_create(
-                year = year_obj,
-                region=region_obj,
-                month=month_value,
-                parameter = parameter_obj,
-                value=value
+        # if value is not None:
+        #     obj,created = MonthlyData.objects.get_or_create(
+        #         year = year_obj,
+        #         region=region_obj,
+        #         month=month_value,
+        #         parameter = parameter_obj,
+        #         value=value
 
-            )
+        #     )
 
-        serializer = MonthlySerializer(obj)
+        # serializer = MonthlySerializer(obj)
         
-        return Response(serializer.data,
-                        status = 201 if created else 200
-                        )
+        # return Response(serializer.data,
+        #                 status = 201 if created else 200
+        #                 )
 
-
-
-              
 
 
 class SeasonalView(APIView):
