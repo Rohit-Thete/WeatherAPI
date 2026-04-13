@@ -18,3 +18,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+__pycache__/
+*.pyc
+db.sqlite3
+venv/
