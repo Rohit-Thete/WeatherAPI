@@ -9,83 +9,296 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Region',
+            name="Region",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, unique=True)),
             ],
             options={
-                'ordering': ['name'],
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='Unit',
+            name="Unit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(choices=[('celcius', '°C'), ('mm', 'mm'), ('hours', 'hours'), ('days', 'days'), ('percent', 'percent'), ('meters_per_second', 'meters_per_second'), ('hpa', 'hpa')], max_length=20, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        choices=[
+                            ("celcius", "°C"),
+                            ("mm", "mm"),
+                            ("hours", "hours"),
+                            ("days", "days"),
+                            ("percent", "percent"),
+                            ("meters_per_second", "meters_per_second"),
+                            ("hpa", "hpa"),
+                        ],
+                        max_length=20,
+                        unique=True,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Parameter',
+            name="Parameter",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(choices=[('Tmax', 'Tmax'), ('Tmin', 'Tmin'), ('Tmean', 'Tmean'), ('Rainfall', 'Rainfall'), ('Sunshine', 'Sunshine'), ('Raindays1mm', 'Raindays1mm'), ('AirFrost', 'AirFrost'), ('Humidity', 'Humidity'), ('Windspeed', 'Windspeed'), ('Pressure', 'Pressure'), ('Snowfall', 'Snowfall')], max_length=50, unique=True)),
-                ('unit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='api.unit')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        choices=[
+                            ("Tmax", "Tmax"),
+                            ("Tmin", "Tmin"),
+                            ("Tmean", "Tmean"),
+                            ("Rainfall", "Rainfall"),
+                            ("Sunshine", "Sunshine"),
+                            ("Raindays1mm", "Raindays1mm"),
+                            ("AirFrost", "AirFrost"),
+                            ("Humidity", "Humidity"),
+                            ("Windspeed", "Windspeed"),
+                            ("Pressure", "Pressure"),
+                            ("Snowfall", "Snowfall"),
+                        ],
+                        max_length=50,
+                        unique=True,
+                    ),
+                ),
+                (
+                    "unit",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s",
+                        to="api.unit",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['name'],
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='MonthlyData',
+            name="MonthlyData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.IntegerField(validators=[django.core.validators.MaxValueValidator(1000), django.core.validators.MinValueValidator(9999)])),
-                ('value', models.FloatField()),
-                ('month', models.CharField(choices=[('january', 'january'), ('february', 'february'), ('march', 'march'), ('april', 'april'), ('may', 'may'), ('june', 'june'), ('july', 'july'), ('august', 'august'), ('september', 'september'), ('october', 'october'), ('november', 'november'), ('december', 'december')], max_length=100)),
-                ('parameter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='api.parameter')),
-                ('region', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='api.region')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "year",
+                    models.IntegerField(
+                        validators=[
+                            django.core.validators.MaxValueValidator(1000),
+                            django.core.validators.MinValueValidator(9999),
+                        ]
+                    ),
+                ),
+                ("value", models.FloatField()),
+                (
+                    "month",
+                    models.CharField(
+                        choices=[
+                            ("january", "january"),
+                            ("february", "february"),
+                            ("march", "march"),
+                            ("april", "april"),
+                            ("may", "may"),
+                            ("june", "june"),
+                            ("july", "july"),
+                            ("august", "august"),
+                            ("september", "september"),
+                            ("october", "october"),
+                            ("november", "november"),
+                            ("december", "december"),
+                        ],
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "parameter",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s",
+                        to="api.parameter",
+                    ),
+                ),
+                (
+                    "region",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s",
+                        to="api.region",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-year'],
-                'indexes': [models.Index(fields=['year', 'region', 'parameter', 'month'], name='monthly_data_idx')],
-                'constraints': [models.UniqueConstraint(fields=('year', 'region', 'parameter', 'month'), name='unique_monthly_data')],
+                "ordering": ["-year"],
+                "indexes": [
+                    models.Index(
+                        fields=["year", "region", "parameter", "month"],
+                        name="monthly_data_idx",
+                    )
+                ],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("year", "region", "parameter", "month"),
+                        name="unique_monthly_data",
+                    )
+                ],
             },
         ),
         migrations.CreateModel(
-            name='AnnualData',
+            name="AnnualData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.IntegerField(validators=[django.core.validators.MaxValueValidator(1000), django.core.validators.MinValueValidator(9999)])),
-                ('value', models.FloatField()),
-                ('parameter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='api.parameter')),
-                ('region', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='api.region')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "year",
+                    models.IntegerField(
+                        validators=[
+                            django.core.validators.MaxValueValidator(1000),
+                            django.core.validators.MinValueValidator(9999),
+                        ]
+                    ),
+                ),
+                ("value", models.FloatField()),
+                (
+                    "parameter",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s",
+                        to="api.parameter",
+                    ),
+                ),
+                (
+                    "region",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s",
+                        to="api.region",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-year'],
-                'indexes': [models.Index(fields=['year', 'region', 'parameter'], name='annual_data_idx')],
-                'constraints': [models.UniqueConstraint(fields=('year', 'region', 'parameter'), name='unique_annual_data')],
+                "ordering": ["-year"],
+                "indexes": [
+                    models.Index(
+                        fields=["year", "region", "parameter"], name="annual_data_idx"
+                    )
+                ],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("year", "region", "parameter"),
+                        name="unique_annual_data",
+                    )
+                ],
             },
         ),
         migrations.CreateModel(
-            name='SeasonalData',
+            name="SeasonalData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('year', models.IntegerField(validators=[django.core.validators.MaxValueValidator(1000), django.core.validators.MinValueValidator(9999)])),
-                ('value', models.FloatField()),
-                ('season', models.CharField(choices=[('winter', 'Winter'), ('spring', 'Spring'), ('summer', 'Summer'), ('autumn', 'Autumn')], max_length=50)),
-                ('parameter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='api.parameter')),
-                ('region', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s', to='api.region')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "year",
+                    models.IntegerField(
+                        validators=[
+                            django.core.validators.MaxValueValidator(1000),
+                            django.core.validators.MinValueValidator(9999),
+                        ]
+                    ),
+                ),
+                ("value", models.FloatField()),
+                (
+                    "season",
+                    models.CharField(
+                        choices=[
+                            ("winter", "Winter"),
+                            ("spring", "Spring"),
+                            ("summer", "Summer"),
+                            ("autumn", "Autumn"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "parameter",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s",
+                        to="api.parameter",
+                    ),
+                ),
+                (
+                    "region",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s",
+                        to="api.region",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-year'],
-                'indexes': [models.Index(fields=['year', 'region', 'parameter', 'season'], name='seasonal_data_idx')],
-                'constraints': [models.UniqueConstraint(fields=('year', 'region', 'parameter', 'season'), name='unique_seasonal_data')],
+                "ordering": ["-year"],
+                "indexes": [
+                    models.Index(
+                        fields=["year", "region", "parameter", "season"],
+                        name="seasonal_data_idx",
+                    )
+                ],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("year", "region", "parameter", "season"),
+                        name="unique_seasonal_data",
+                    )
+                ],
             },
         ),
     ]

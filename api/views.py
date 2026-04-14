@@ -1,285 +1,84 @@
 from django.shortcuts import render
-from .models import MonthlyData, SeasonalData, AnnualData,Unit,Parameter,Region
-from .serializers import MonthlySerializer, SeasonalSerializer, AnnualSerializer, monthlyWriteSerializer, SeasonalWriteSerializer, AnnualWriteSerializer
+from .models import MonthlyData, SeasonalData, AnnualData, Unit, Parameter, Region
+from .serializers import (
+    MonthlySerializer,
+    SeasonalSerializer,
+    AnnualSerializer,
+    monthlyWriteSerializer,
+    SeasonalWriteSerializer,
+    AnnualWriteSerializer,
+)
 from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .utils import load_data
 
-REGIONS = ["UK", "England", "Scotland", "Wales", "Northern_Ireland", "England_and_Wales"]
+REGIONS = [
+    "UK",
+    "England",
+    "Scotland",
+    "Wales",
+    "Northern_Ireland",
+    "England_and_Wales",
+]
 PARAMETERS = ["Tmax", "Tmin", "Sunshine", "Rainfall"]
-
-
-
 
 
 def apply_filter(queryset, field, value):
     if value:
         if not queryset.filter(**{field: value}).exists():
             return None, Response(
-                {"error": f"Data for {field} = {value} is not present"},
-                status=404
+                {"error": f"Data for {field} = {value} is not present"}, status=404
             )
         return queryset.filter(**{field: value}), None
     return queryset, None
 
 
-class LoadData(APIView):
-    def post(self, request):
+# class LoadData(APIView):
+#     def post(self, request):
 
-        try:
-            if MonthlyData.objects.count() == 0 and SeasonalData.objects.count() == 0 and AnnualData.objects.count() == 0:
-                for i in REGIONS:
-                    for j in PARAMETERS:
-                        load_data(i, j)
+#         try:
+#             if (
+#                 MonthlyData.objects.count() == 0
+#                 and SeasonalData.objects.count() == 0
+#                 and AnnualData.objects.count() == 0
+#             ):
+#                 for i in REGIONS:
+#                     for j in PARAMETERS:
+#                         load_data(i, j)
 
-                        return Response("data Loaded Successfully",status=201)
-                    
-        except Exception as e:
-            return Response({"error":str(e)},
-                            status= 500)
+#                 return Response("data Loaded Successfully", status=201)
+
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=500)
 
 
-
-class MonthlyView(APIView):
-    def get(self, request, **kwargs):
-        data = MonthlyData.objects.all()
-        filters = {
-            "year":            request.GET.get('year'),
-            "parameter__name": request.GET.get('parameter'),
-            "region__name":    kwargs.get('region') or request.GET.get('region'),
-            "month":           request.GET.get('month'),
-        }
-        for field, value in filters.items():
-            data, error = apply_filter(data, field, value)
-            if error:
-                return error
-            serializer = MonthlySerializer(data, many=True).data
-        return Response(serializer)
+class MonthlyViewSet(viewsets.ModelViewSet):
+    queryset = MonthlyData.objects.select_related("region", "parameter__unit")
     
-    def post(self,request):
-        serializer = monthlyWriteSerializer(data=request.data) 
-        if not serializer.is_valid():
-            return Response(serializer.errors,status=404 )
-           
-        obj = serializer.save()
-        return Response(MonthlySerializer(obj).data,status=201)
-        
-        # year_value =data.get("year")
-        # month_value = data.get("month")
-        # region_value = data.get("region")
-        # parameter_name = data.get("parameter")
-        # value = data.get("value")
-
-        # if not all(["year","month","region","parameter","value"]):
-        #     return Response ("All values are required")
-        
-        # valid_parameters =[p[0] for p in PARAMETER_CHOICES]
-        # if parameter_name not in valid_parameters:
-        #     return Response("Enter valid Parameter")
-        
-        # valid_months =[m[0] for m in MONTH_CHOICES]
-        # if month_value not in valid_months:
-        #     return Response("Invalid Month")
-        
-
-        # unit_name = PARAMETER_UNITS.get(parameter_name)
-
-        # unit_obj,_ = Unit.objects.get_or_create(name = unit_name)
-
-        # parameter_obj,c = Parameter.objects.get_or_create(name = parameter_name,defaults={"unit":unit_obj})
-
-        # if not c and parameter_obj.unit != unit_obj:
-        #     parameter_obj.unit=unit_obj
-        #     parameter_obj.save()
-
-        # year_obj, _ = Year.objects.get_or_create(year = year_value)
-        # region_obj, _ = Region.objects.get_or_create(name=region_value)
-
-        # if value is not None:
-        #     obj,created = MonthlyData.objects.get_or_create(
-        #         year = year_obj,
-        #         region=region_obj,
-        #         month=month_value,
-        #         parameter = parameter_obj,
-        #         value=value
-
-        #     )
-
-        # serializer = MonthlySerializer(obj)
-        
-        # return Response(serializer.data,
-        #                 status = 201 if created else 200
-        #                 )
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return MonthlySerializer
+        return monthlyWriteSerializer
 
 
-    def put(self,request,pk):
-
-        obj = get_object_or_404(MonthlyData,pk = pk)
-
-        serializer = monthlyWriteSerializer(instance = obj,data = request.data)
-        
-        if serializer.is_valid():
-            obj = serializer.save()
-
-            return Response(MonthlySerializer(obj).data)
-        
-        else:
-            return Response(serializer.errors,status=400)
-        
-    def patch(self,request,pk):
-        obj = get_object_or_404(MonthlyData,pk = pk)
-
-        serializer = monthlyWriteSerializer(instance = obj,data=request.data,partial = True)
-
-        if serializer.is_valid():
-            obj = serializer.save()
-            return Response(MonthlySerializer(obj).data)
-        
-        else:
-            return Response(serializer.errors,status=400)
-
-
-
-class SeasonalView(APIView):
-    def get(self, request, **kwargs):
-        data = SeasonalData.objects.all()
-        filters = {
-            "year":            request.GET.get('year'),
-            "parameter__name": request.GET.get('parameter'),
-            "region__name":    kwargs.get('region') or request.GET.get('region'),
-            "season":          request.GET.get('season'),
-        }
-        for field, value in filters.items():
-            data, error = apply_filter(data, field, value)
-            if error:
-                return error
-            serializer = SeasonalSerializer(data, many=True)
-        return Response(serializer.data)
+class SeasonalViewSet(viewsets.ModelViewSet):
+    queryset = SeasonalData.objects.select_related("region", "parameter__unit")
     
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return SeasonalSerializer
+        return SeasonalWriteSerializer
 
-    def post(self,request):
-        serializer = SeasonalWriteSerializer(data = request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors,status=404)
-        
-        obj = serializer.save()
 
-        # return Response(SeasonalSerializer(obj).data, status=201)
-
-        # valid_season = [s[0] for s in SEASON_CHOICES]
-        # if season_value not in valid_season:
-        #     return Response(
-        #         {"error":"Enter Valid Season"},
-        #         status=400
-        #     )
-        
-        # unit_name = PARAMETER_UNITS.get(parameter_name)
-        # unit_obj, _= Unit.objects.get_or_create(name = unit_name)
-
-        # valid_parameters = [p[0] for p in PARAMETER_CHOICES]
-        # if parameter_name not in valid_parameters:
-        #     return Response({
-        #         "error":"Enter Valid Parameter Value"},
-        #         status=400
-        #     )
-        # parameter_obj,c = Parameter.objects.get_or_create(name = parameter_name,defaults={"unit":unit_obj})
-
-        # if not c and parameter_obj.unit != unit_obj:
-        #     parameter_obj.unit = unit_obj
-        #     parameter_obj.save()
-
-        # year_obj,_ = Year.objects.get_or_create(year=year_value)
-
-        # region_obj,_ = Region.objects.get_or_create(name = region_value)
-
-        # if value is not None:
-        #     obj,created = SeasonalData.objects.get_or_create(
-        #         year = year_obj,
-        #         region = region_obj,
-        #         season = season_value,
-        #         parameter = parameter_obj,
-        #         value = value
-        #     )
-
-        # serializer = SeasonalSerializer(obj)
-
-        # return Response(serializer.data,
-        #                 status=201 if created else 200
-        #                 )
-
-        
-
-class AnnualView(APIView):
-    def get(self, request, **kwargs):
-        data = AnnualData.objects.all()
-        filters = {
-            "year":            request.GET.get('year'),
-            "parameter__name": request.GET.get('parameter'),
-            "region__name":    kwargs.get('region') or request.GET.get('region'),
-        }
-        for field, value in filters.items():
-            data, error = apply_filter(data, field, value)
-            if error:
-                return error
-        return Response(AnnualSerializer(data, many=True).data)
+class AnnualViewSet(viewsets.ModelViewSet):
+    queryset = AnnualData.objects.select_related("region", "parameter__unit")
     
-
-    def post(self,request):
-        serializer = AnnualWriteSerializer(data = request.data)
-
-        if not serializer.is_valid():
-            return Response(serializer.errors,status=400)
-        
-        obj = serializer.save()
-
-        return Response(AnnualSerializer(obj).data,status=201)
-
-        # year_value = data.get("year")
-        # region_value = data.get("region")
-        # parameter_name = data.get("parameter")
-        # value = data.get("value")
-
-        # unit_name = PARAMETER_UNITS.get(parameter_name)
-        # unit_obj,_ = Unit.objects.get_or_create(name = unit_name)
-
-        # valid_parameters =[p[0] for p in PARAMETER_CHOICES]
-        # if parameter_name not in valid_parameters:
-        #     return Response(
-        #         {
-        #             "error":"Enter Valid Parameter"
-        #         },
-        #         status=400
-        #     )
-        
-        # parameter_obj ,c =Parameter.objects.get_or_create(name = parameter_name,defaults={"unit":unit_obj})
-
-        # if not c and parameter_obj.unit != unit_obj:
-        #     parameter_obj.unit = unit_obj
-        #     parameter_obj.save()
-
-        # year_obj,_ = Year.objects.get_or_create(year = year_value)
-
-        # region_obj, _ = Region.objects.get_or_create(name = region_value)
-
-        # if value is not None:
-        #     obj,created = AnnualData.objects.get_or_create(
-        #         year = year_obj,
-        #         region = region_obj,
-        #         parameter = parameter_obj,
-        #         value = value
-        #     )
-
-        # serializer = AnnualSerializer(obj)
-
-        # return Response(
-        #     serializer.data,
-        #     status=201 if created else 200
-        # )
-
-
-
-
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return AnnualSerializer
+        return AnnualWriteSerializer
 
 def home(request):
-    return render(request, 'index.html')
+    return render(request, "index.html")

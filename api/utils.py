@@ -1,24 +1,22 @@
 import requests
-from .models import MonthlyData, SeasonalData, AnnualData, Region, Parameter,Unit
-from .constants import PARAMETER_UNITS,SEASONS,MONTHS
-
-
+from .models import MonthlyData, SeasonalData, AnnualData, Region, Parameter, Unit
+from .constants import PARAMETER_UNITS, SEASONS, MONTHS
 
 
 def load_data(region_name, parameter_name):
     unit_name = PARAMETER_UNITS.get(parameter_name)
-    unit,_ = Unit.objects.get_or_create(name = unit_name) 
+    unit, _ = Unit.objects.get_or_create(name=unit_name)
 
-    region,_ = Region.objects.get_or_create(name = region_name)
+    region, _ = Region.objects.get_or_create(name=region_name)
 
-    parameter,created =Parameter.objects.get_or_create(name = parameter_name,defaults={"unit":unit})
+    parameter, created = Parameter.objects.get_or_create(
+        name=parameter_name, defaults={"unit": unit}
+    )
 
     if not created and parameter.unit != unit:
         parameter.unit = unit
         parameter.save()
 
-
-    
     url = f"https://www.metoffice.gov.uk/pub/data/weather/uk/climate/datasets/{parameter_name}/date/{region_name}.txt"
     response = requests.get(url)
     lines = response.text.splitlines()
@@ -33,7 +31,6 @@ def load_data(region_name, parameter_name):
             continue
 
         year = int(col[0])
-        
 
         # MONTHLY DATA
         for i in range(12):
@@ -44,7 +41,7 @@ def load_data(region_name, parameter_name):
                     region=region,
                     parameter=parameter,
                     month=MONTHS[i],
-                    defaults={"value": value}
+                    defaults={"value": value},
                 )
 
         # SEASONAL DATA
@@ -56,24 +53,19 @@ def load_data(region_name, parameter_name):
                     region=region,
                     parameter=parameter,
                     season=SEASONS[i],
-                    defaults={"value": value}
+                    defaults={"value": value},
                 )
 
         # ANNUAL DATA
         annual_value = col[17]
         value = None if annual_value == "---" else float(annual_value)
-        if value is  not None:
+        if value is not None:
             AnnualData.objects.get_or_create(
-                year=year,
-                region=region,
-                parameter=parameter,
-                defaults={"value": value}
+                year=year, region=region, parameter=parameter, defaults={"value": value}
             )
-        break
+       
 
     print(f"Data loaded successfully for {region_name} - {parameter_name}")
-    
-
 
 
 # def get_monthly_filtered_data(year=None, parameter=None, region=None, month=None):
