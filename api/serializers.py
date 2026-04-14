@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import MonthlyData, SeasonalData, AnnualData, Region, Parameter, Unit
 from .constants import MONTH_CHOICES, PARAMETER_CHOICES, SEASON_CHOICES, PARAMETER_UNITS
+from .service import get_parameter_obj, get_region_obj
 
 
 class MonthlySerializer(serializers.ModelSerializer):
@@ -25,11 +26,11 @@ class monthlyWriteSerializer(serializers.ModelSerializer):
 
         month = data.get("month")
         if month is not None and month not in [m[0] for m in MONTH_CHOICES]:
-            raise serializers.ValidationError("Enter valid month")
+            raise serializers.ValidationError({f'enter valid Month from {MONTH_CHOICES}'})
 
         parameter = data.get("parameter")
         if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError("enter valid parameter")
+            raise serializers.ValidationError({f'enter valid parameter from {PARAMETER_CHOICES}'})
 
         return data
 
@@ -37,20 +38,22 @@ class monthlyWriteSerializer(serializers.ModelSerializer):
         month_value = validated_data.get("month")
         value = validated_data.get("value")
         year = validated_data.get("year")
+        region_name = validated_data.get("region")
 
-        region_obj, _ = Region.objects.get_or_create(name=validated_data.get("region"))
+        region_obj = get_region_obj(region_name)
 
         parameter_name = validated_data.get("parameter")
-        unit_name = PARAMETER_UNITS.get(parameter_name)
-        unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+        parameter_obj = get_parameter_obj(parameter_name)
+        # unit_name = PARAMETER_UNITS.get(parameter_name)
+        # unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
 
-        parameter_obj, c = Parameter.objects.get_or_create(
-            name=parameter_name, defaults={"unit": unit_obj}
-        )
+        # parameter_obj, c = Parameter.objects.get_or_create(
+        #     name=parameter_name, defaults={"unit": unit_obj}
+        # )
 
-        if not c and parameter_obj.unit != unit_obj:
-            parameter_obj.unit = unit_obj
-            parameter_obj.save()
+        # if not c and parameter_obj.unit != unit_obj:
+        #     parameter_obj.unit = unit_obj
+        #     parameter_obj.save()
 
         obj, _ = MonthlyData.objects.get_or_create(
             year=year,
@@ -115,11 +118,11 @@ class SeasonalWriteSerializer(serializers.ModelSerializer):
 
         season = data.get("season")
         if season is not None and season not in [s[0] for s in SEASON_CHOICES]:
-            raise serializers.ValidationError("Enter valid Season")
+            raise serializers.ValidationError({f'enter valid Season from {SEASON_CHOICES}'})
 
         parameter = data.get("parameter")
         if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError("enter valid parameter")
+            raise serializers.ValidationError({f'enter valid parameter from {PARAMETER_CHOICES}'})
 
         return data
 
@@ -129,18 +132,20 @@ class SeasonalWriteSerializer(serializers.ModelSerializer):
         season_name = validated_data.get("season")
         parameter_name = validated_data.get("parameter")
         value = validated_data.get("value")
+        region_name = validated_data.get("region")
 
-        region_obj, _ = Region.objects.get_or_create(name=validated_data.get("region"))
-        unit_name = PARAMETER_UNITS.get(parameter_name)
-        unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+        region_obj = get_region_obj(region_name)
+        parameter_obj = get_parameter_obj(parameter_name)
+        # unit_name = PARAMETER_UNITS.get(parameter_name)
+        # unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
 
-        parameter_obj, created = Parameter.objects.get_or_create(
-            name=parameter_name, defaults={"unit": unit_obj}
-        )
+        # parameter_obj, created = Parameter.objects.get_or_create(
+        #     name=parameter_name, defaults={"unit": unit_obj}
+        # )
 
-        if not created and parameter_obj.unit != unit_obj:
-            parameter_obj.unit = unit_obj
-            parameter_obj.save()
+        # if not created and parameter_obj.unit != unit_obj:
+        #     parameter_obj.unit = unit_obj
+        #     parameter_obj.save()
 
         obj, _ = SeasonalData.objects.get_or_create(
             year=year,
@@ -175,7 +180,7 @@ class AnnualWriteSerializer(serializers.ModelSerializer):
 
         parameter = data.get("parameter")
         if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError("enter valid parameter")
+            raise serializers.ValidationError({f'enter valid parameter from {PARAMETER_CHOICES}'})
 
         return data
 
@@ -183,19 +188,10 @@ class AnnualWriteSerializer(serializers.ModelSerializer):
         year = validated_data.get("year")
         value = validated_data.get("value")
         parameter_name = validated_data.get("parameter")
+        region_name = validated_data.get("region")
 
-        unit_name = PARAMETER_UNITS.get(parameter_name)
-        unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
-
-        parameter_obj, created = Parameter.objects.get_or_create(
-            name=parameter_name, defaults={"unit": unit_obj}
-        )
-
-        if not created and parameter_obj.unit != unit_obj:
-            parameter_obj.unit = unit_obj
-            parameter_obj.save()
-
-        region_obj, _ = Region.objects.get_or_create(name=validated_data.get("region"))
+        parameter_obj = get_parameter_obj(parameter_name)
+        region_obj = get_region_obj(region_name)
 
         obj, _ = AnnualData.objects.get_or_create(
             year=year, region=region_obj, parameter=parameter_obj, value=value

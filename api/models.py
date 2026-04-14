@@ -56,7 +56,7 @@ class MonthlyData(WeatherData):
         return f"{self.year} - {self.month} - {self.region} - {self.parameter} - {self.value}"
 
     class Meta:
-        ordering = ["-year"]
+        ordering = ["-year","month"]
         constraints = [
             models.UniqueConstraint(
                 fields=["year", "region", "parameter", "month"],

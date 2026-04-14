@@ -68,6 +68,20 @@ def load_data(region_name, parameter_name):
     print(f"Data loaded successfully for {region_name} - {parameter_name}")
 
 
+
+
+def get_parameter_obj(parameter_name):
+    unit_name = PARAMETER_UNITS.get(parameter_name)
+    unit_obj,_ = Unit.objects.get_or_create(name = unit_name)
+    parameter_obj,created = Parameter.objects.get_or_create(name=parameter_name,defaults={"unit":unit_obj})
+
+    if not created and parameter_obj.unit != unit_obj:
+        parameter_obj.unit = unit_obj
+        parameter_obj.save()
+
+    return parameter_obj
+
+
 # def get_monthly_filtered_data(year=None, parameter=None, region=None, month=None):
 #     data = MonthlyData.objects.all()
 #     if year:
