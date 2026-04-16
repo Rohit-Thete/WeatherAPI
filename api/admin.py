@@ -3,6 +3,17 @@ from .models import *
 
 # Register your models here.
 
+@admin.register(Region)
+class RegionAdmin(admin.ModelAdmin):
+    list_display=["name"]
+
+@admin.register(Unit)
+class UnitAdmin(admin.ModelAdmin):
+    list_display=["name"]
+
+@admin.register(Parameter)
+class ParameterAdmin(admin.ModelAdmin):
+    list_display=["name","unit"]
 
 @admin.register(MonthlyData)
 class MonthlyAdmin(admin.ModelAdmin):

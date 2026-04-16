@@ -35,65 +35,72 @@ class monthlyWriteSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        month_value = validated_data.get("month")
-        value = validated_data.get("value")
-        year = validated_data.get("year")
-        region_name = validated_data.get("region")
 
-        region_obj = get_region_obj(region_name)
 
-        parameter_name = validated_data.get("parameter")
-        parameter_obj = get_parameter_obj(parameter_name)
-        # unit_name = PARAMETER_UNITS.get(parameter_name)
-        # unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+        from .service import create_or_update_monthlydata
+        return create_or_update_monthlydata(validated_data)
+        # month_value = validated_data.get("month")
+        # value = validated_data.get("value")
+        # year = validated_data.get("year")
+        # region_name = validated_data.get("region")
 
-        # parameter_obj, c = Parameter.objects.get_or_create(
-        #     name=parameter_name, defaults={"unit": unit_obj}
+        # region_obj = get_region_obj(region_name)
+
+        # parameter_name = validated_data.get("parameter")
+        # parameter_obj = get_parameter_obj(parameter_name)
+        # # unit_name = PARAMETER_UNITS.get(parameter_name)
+        # # unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+
+        # # parameter_obj, c = Parameter.objects.get_or_create(
+        # #     name=parameter_name, defaults={"unit": unit_obj}
+        # # )
+
+        # # if not c and parameter_obj.unit != unit_obj:
+        # #     parameter_obj.unit = unit_obj
+        # #     parameter_obj.save()
+
+        # obj, _ = MonthlyData.objects.update_or_create(
+        #     year=year,
+        #     region=region_obj,
+        #     month=month_value,
+        #     parameter=parameter_obj,
+        #     defaults={"value":value}
         # )
 
-        # if not c and parameter_obj.unit != unit_obj:
-        #     parameter_obj.unit = unit_obj
-        #     parameter_obj.save()
-
-        obj, _ = MonthlyData.objects.get_or_create(
-            year=year,
-            region=region_obj,
-            month=month_value,
-            parameter=parameter_obj,
-            value=value,
-        )
-
-        return obj
+        # return obj
 
     def update(self, instance, validated_data):
 
-        if "region" in validated_data:
-            region_obj, _ = Region.objects.get_or_create(
-                name=validated_data.get("region")
-            )
-            instance.region = region_obj
+        from .service import create_or_update_monthlydata
+        return create_or_update_monthlydata(validated_data)
 
-        if "parameter" in validated_data:
-            parameter_name = validated_data.get("parameter")
-            unit_name = PARAMETER_UNITS.get(parameter_name)
-            unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
-            parameter_obj, created = Parameter.objects.get_or_create(
-                name=parameter_name, defaults={"unit": unit_obj}
-            )
+        # if "region" in validated_data:
+        #     region_obj, _ = Region.objects.get_or_create(
+        #         name=validated_data.get("region")
+        #     )
+        #     instance.region = region_obj
 
-            if not created and parameter_obj.unit != unit_obj:
-                parameter_obj.unit = unit_obj
-                parameter_obj.save()
+        # if "parameter" in validated_data:
+        #     parameter_name = validated_data.get("parameter")
+        #     unit_name = PARAMETER_UNITS.get(parameter_name)
+        #     unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+        #     parameter_obj, created = Parameter.objects.get_or_create(
+        #         name=parameter_name, defaults={"unit": unit_obj}
+        #     )
 
-            instance.parameter = parameter_obj
+        #     if not created and parameter_obj.unit != unit_obj:
+        #         parameter_obj.unit = unit_obj
+        #         parameter_obj.save()
 
-        instance.year = validated_data.get("year", instance.year)
-        instance.month = validated_data.get("month", instance.month)
-        instance.value = validated_data.get("value", instance.value)
+        #     instance.parameter = parameter_obj
 
-        instance.save()
+        # instance.year = validated_data.get("year", instance.year)
+        # instance.month = validated_data.get("month", instance.month)
+        # instance.value = validated_data.get("value", instance.value)
 
-        return instance
+        # instance.save()
+
+        # return instance
 
 
 class SeasonalSerializer(serializers.ModelSerializer):
@@ -128,34 +135,42 @@ class SeasonalWriteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        year = validated_data.get("year")
-        season_name = validated_data.get("season")
-        parameter_name = validated_data.get("parameter")
-        value = validated_data.get("value")
-        region_name = validated_data.get("region")
+        from .service import create_or_update_seasonaldata
+        return create_or_update_seasonaldata(validated_data)
 
-        region_obj = get_region_obj(region_name)
-        parameter_obj = get_parameter_obj(parameter_name)
-        # unit_name = PARAMETER_UNITS.get(parameter_name)
-        # unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+        # year = validated_data.get("year")
+        # season_name = validated_data.get("season")
+        # parameter_name = validated_data.get("parameter")
+        # value = validated_data.get("value")
+        # region_name = validated_data.get("region")
 
-        # parameter_obj, created = Parameter.objects.get_or_create(
-        #     name=parameter_name, defaults={"unit": unit_obj}
+        # region_obj = get_region_obj(region_name)
+        # parameter_obj = get_parameter_obj(parameter_name)
+        # # unit_name = PARAMETER_UNITS.get(parameter_name)
+        # # unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+
+        # # parameter_obj, created = Parameter.objects.get_or_create(
+        # #     name=parameter_name, defaults={"unit": unit_obj}
+        # # )
+
+        # # if not created and parameter_obj.unit != unit_obj:
+        # #     parameter_obj.unit = unit_obj
+        # #     parameter_obj.save()
+
+        # obj, _ = SeasonalData.objects.update_or_create(
+        #     year=year,
+        #     region=region_obj,
+        #     season=season_name,
+        #     parameter=parameter_obj,
+        #    defaults={"value":value}
         # )
 
-        # if not created and parameter_obj.unit != unit_obj:
-        #     parameter_obj.unit = unit_obj
-        #     parameter_obj.save()
+        # return obj
 
-        obj, _ = SeasonalData.objects.get_or_create(
-            year=year,
-            region=region_obj,
-            season=season_name,
-            parameter=parameter_obj,
-            value=value,
-        )
 
-        return obj
+    def update(self,instance,validated_data):
+        from .service import create_or_update_seasonaldata
+        return create_or_update_seasonaldata(validated_data)
 
 
 class AnnualSerializer(serializers.ModelSerializer):
@@ -185,16 +200,25 @@ class AnnualWriteSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        year = validated_data.get("year")
-        value = validated_data.get("value")
-        parameter_name = validated_data.get("parameter")
-        region_name = validated_data.get("region")
 
-        parameter_obj = get_parameter_obj(parameter_name)
-        region_obj = get_region_obj(region_name)
+        from .service import create_or_update_annualdata
+        return create_or_update_annualdata(validated_data)
 
-        obj, _ = AnnualData.objects.get_or_create(
-            year=year, region=region_obj, parameter=parameter_obj, value=value
-        )
 
-        return obj
+        # year = validated_data.get("year")
+        # value = validated_data.get("value")
+        # parameter_name = validated_data.get("parameter")
+        # region_name = validated_data.get("region")
+
+        # parameter_obj = get_parameter_obj(parameter_name)
+        # region_obj = get_region_obj(region_name)
+
+        # obj, _ = AnnualData.objects.update_or_create(
+        #     year=year, region=region_obj, parameter=parameter_obj, defaults={"value":value}
+        # )
+
+        # return obj
+
+    def update(self,instance,validated_data):
+        from .service import create_or_update_annualdata
+        return create_or_update_annualdata(validated_data)

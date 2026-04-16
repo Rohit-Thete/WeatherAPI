@@ -82,6 +82,20 @@ def get_parameter_obj(parameter_name):
     return parameter_obj
 
 
+def load_parameters():
+    from .models import Parameter, Unit
+    from .constants import PARAMETER_CHOICES, PARAMETER_UNITS
+
+    for name, _ in PARAMETER_CHOICES:
+        unit_name = PARAMETER_UNITS.get(name)
+        unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+
+        Parameter.objects.get_or_create(
+            name=name,
+            defaults={"unit": unit_obj}
+        )
+
+
 # def get_monthly_filtered_data(year=None, parameter=None, region=None, month=None):
 #     data = MonthlyData.objects.all()
 #     if year:

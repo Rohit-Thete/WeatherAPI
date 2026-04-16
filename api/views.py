@@ -8,6 +8,7 @@ from .serializers import (
     SeasonalWriteSerializer,
     AnnualWriteSerializer,
 )
+from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -54,16 +55,28 @@ def apply_filter(queryset, field, value):
 #             return Response({"error": str(e)}, status=500)
 
 
-class MonthlyViewSet(viewsets.ModelViewSet):
-    queryset = MonthlyData.objects.select_related("region", "parameter__unit")
+class AtomicViewSet(viewsets.ModelViewSet):
+    @transaction.atomic
+    def create(self,request,*args,**kwargs):
+        return super().create(request,*args,**kwargs)
+    @transaction.atomic
+    def update(self,request,*args,**kwargs):
+        return super().update(request,*args,**kwargs)
     
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+
+class MonthlyViewSet(AtomicViewSet):
+    queryset = MonthlyData.objects.select_related("region", "parameter__unit")
+    print(queryset.query)
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
             return MonthlySerializer
         return monthlyWriteSerializer
 
 
-class SeasonalViewSet(viewsets.ModelViewSet):
+class SeasonalViewSet(AtomicViewSet):
     queryset = SeasonalData.objects.select_related("region", "parameter__unit")
     
     def get_serializer_class(self):
@@ -72,7 +85,7 @@ class SeasonalViewSet(viewsets.ModelViewSet):
         return SeasonalWriteSerializer
 
 
-class AnnualViewSet(viewsets.ModelViewSet):
+class AnnualViewSet(AtomicViewSet):
     queryset = AnnualData.objects.select_related("region", "parameter__unit")
     
     def get_serializer_class(self):
