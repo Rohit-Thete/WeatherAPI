@@ -1,111 +1,131 @@
 import requests
-from .models import MonthlyData, SeasonalData, AnnualData
+from .models import MonthlyData, SeasonalData, AnnualData, Region, Parameter, Unit
+from .constants import PARAMETER_UNITS, SEASONS, MONTHS
 
 
-def load_data(region, parameter):
-    region=region.strip()
+def load_data(region_name, parameter_name):
+    unit_name = PARAMETER_UNITS.get(parameter_name)
+    unit, _ = Unit.objects.get_or_create(name=unit_name)
 
-    url = f"https://www.metoffice.gov.uk/pub/data/weather/uk/climate/datasets/{parameter}/date/{region}.txt"
+    region, _ = Region.objects.get_or_create(name=region_name)
 
+    parameter, created = Parameter.objects.get_or_create(
+        name=parameter_name, defaults={"unit": unit}
+    )
+
+    if not created and parameter.unit != unit:
+        parameter.unit = unit
+        parameter.save()
+
+    url = f"https://www.metoffice.gov.uk/pub/data/weather/uk/climate/datasets/{parameter_name}/date/{region_name}.txt"
     response = requests.get(url)
     lines = response.text.splitlines()
 
-    months = ["Jan","Feb","Mar","Apr","May","Jun",
-              "Jul","Aug","Sep","Oct","Nov","Dec"]
-
-    seasons = ["Win","Spr","Sum","Aut","Ann"]
-
     for line in lines:
-
         col = line.split()
 
-        #invalid rows
-        if len(col) < 13:
+        # Skip invalid rows
+        if len(col) < 17:
             continue
-
         if not col[0].isdigit():
             continue
 
         year = int(col[0])
 
-        #MONTH DATA
+        # MONTHLY DATA
         for i in range(12):
-            value = col[i+1]
+            value = None if col[i + 1] == "---" else float(col[i + 1])
+            if value is not None:
+                MonthlyData.objects.get_or_create(
+                    year=year,
+                    region=region,
+                    parameter=parameter,
+                    month=MONTHS[i],
+                    defaults={"value": value},
+                )
 
-            if value == "---":
-                temp = None
-            else:
-                temp = float(value)
+        # SEASONAL DATA
+        for i in range(4):
+            value = None if col[13 + i] == "---" else float(col[13 + i])
+            if value is not None:
+                SeasonalData.objects.get_or_create(
+                    year=year,
+                    region=region,
+                    parameter=parameter,
+                    season=SEASONS[i],
+                    defaults={"value": value},
+                )
 
-
-            MonthlyData.objects.create(
-                year=year,
-                region=region,
-                parameter=parameter,
-                month=months[i].strip(),
-                temprature=temp
+        # ANNUAL DATA
+        annual_value = col[17]
+        value = None if annual_value == "---" else float(annual_value)
+        if value is not None:
+            AnnualData.objects.get_or_create(
+                year=year, region=region, parameter=parameter, defaults={"value": value}
             )
 
-        #SEASON DATA
-        for i in range(5):
-            value = col[13+i]
-
-            if value == "---":
-                temp = None
-            else:
-                temp = float(value)
-
-            SeasonalData.objects.create(
-                year=year,
-                region=region,
-                parameter=parameter,
-                season=seasons[i].strip(),
-                temprature=temp
-            )
-
-        #ANNUAL DATA 
-        for i in range(1):
-            annual_value = col[17+i]
-
-            if annual_value == "---":
-                temp = None
-            else:
-                temp = float(annual_value)
-
-                print("ANNUAL:", temp)
-
-            AnnualData.objects.create(
-            year=year,
-            region=region,
-            parameter=parameter,
-            temprature=temp
-            )
-
-    print("Data stored successfully")
+    print(f"Data loaded successfully for {region_name} - {parameter_name}")
 
 
+def get_parameter_obj(parameter_name):
+    unit_name = PARAMETER_UNITS.get(parameter_name)
+    unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+    parameter_obj, created = Parameter.objects.get_or_create(
+        name=parameter_name, defaults={"unit": unit_obj}
+    )
 
-# def get_monthly_filtered_data(year=None,parameter=None,region=None,month=None):
-        
+    if not created and parameter_obj.unit != unit_obj:
+        parameter_obj.unit = unit_obj
+        parameter_obj.save()
+
+    return parameter_obj
+
+
+def load_parameters():
+    from .models import Parameter, Unit
+    from .constants import PARAMETER_CHOICES, PARAMETER_UNITS
+
+    for name, _ in PARAMETER_CHOICES:
+        unit_name = PARAMETER_UNITS.get(name)
+        unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+
+        Parameter.objects.get_or_create(name=name, defaults={"unit": unit_obj})
+
+
+# def get_monthly_filtered_data(year=None, parameter=None, region=None, month=None):
 #     data = MonthlyData.objects.all()
 #     if year:
 #         data = data.filter(year=year)
-
 #     if parameter:
-#         data = data.filter(parameter=parameter)
-
+#         data = data.filter(parameter__name=parameter)
 #     if region:
-#         data = data.filter(region=region)
-        
+#         data = data.filter(region__name=region)
 #     if month:
 #         data = data.filter(month=month)
+#     return data
 
-#         return data
+
+# def get_seasonal_filtered_data(year=None, parameter=None, region=None, season=None):
+#     data = SeasonalData.objects.all()
+#     if year:
+#         data = data.filter(year=year)
+#     if parameter:
+#         data = data.filter(parameter__name=parameter)
+#     if region:
+#         data = data.filter(region__name=region)
+#     if season:
+#         data = data.filter(season=season)
+#     return data
 
 
-# def get_seasonal_filtered_data(year=None,parameter=None,region=None,season=None):
-   
-    
-# def get_annual_filtered_data(year=None,parameter=None,region=None,sort=None):
-
-    
+# def get_annual_filtered_data(year=None, parameter=None, region=None, sort=None):
+#     data = AnnualData.objects.all()
+#     if year:
+#         data = data.filter(year=year)
+#     if parameter:
+#         data = data.filter(parameter__name=parameter)
+#     if region:
+#         data = data.filter(region__name=region)
+#     if sort:
+#         data = data.order_by(sort)
+#     return data

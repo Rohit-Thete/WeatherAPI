@@ -1,119 +1,100 @@
 from django.shortcuts import render
-from .models import MonthlyData,SeasonalData,AnnualData
-from .serializers import MonthlySerializer,SeasonalSerializer,AnnualSerializer
+from .models import MonthlyData, SeasonalData, AnnualData, Unit, Parameter, Region
+from .serializers import (
+    MonthlySerializer,
+    SeasonalSerializer,
+    AnnualSerializer,
+    monthlyWriteSerializer,
+    SeasonalWriteSerializer,
+    AnnualWriteSerializer,
+)
+from django.db import transaction
 from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.response import Response
-from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from .utils import load_data
 
-region=["UK","England","Scotland","Wales","Northern Ireland","England & Wales"]
-parameter=["Tmax","Tmin","Sunshine","Rainfall"]
-# MonthlyData.objects.all().delete()
-# SeasonalData.objects.all().delete()
-# AnnualData.objects.all().delete()
-if MonthlyData.objects.count() == 0 and SeasonalData.objects.count() == 0 and AnnualData.objects.count() == 0 :
-    for i in region:
-        for j in parameter:
-            load_data(i,j)
+REGIONS = [
+    "UK",
+    "England",
+    "Scotland",
+    "Wales",
+    "Northern_Ireland",
+    "England_and_Wales",
+]
+PARAMETERS = ["Tmax", "Tmin", "Sunshine", "Rainfall"]
 
-    # load_data("UK", "Tmax")
-    # load_data("UK", "Tmin")
 
-    # load_data("England", "Tmax")
-    # load_data("England", "Tmin")
+def apply_filter(queryset, field, value):
+    if value:
+        if not queryset.filter(**{field: value}).exists():
+            return None, Response(
+                {"error": f"Data for {field} = {value} is not present"}, status=404
+            )
+        return queryset.filter(**{field: value}), None
+    return queryset, None
 
-    # load_data("Scotland", "Tmax")
 
-# Create your views here.
+# class LoadData(APIView):
+#     def post(self, request):
 
-class MonthlyView(APIView):
-    def get(self,request):
+#         try:
+#             if (
+#                 MonthlyData.objects.count() == 0
+#                 and SeasonalData.objects.count() == 0
+#                 and AnnualData.objects.count() == 0
+#             ):
+#                 for i in REGIONS:
+#                     for j in PARAMETERS:
+#                         load_data(i, j)
 
-        data = MonthlyData.objects.all()
-        year = request.GET.get('year')
-        parameter=request.GET.get('parameter')
-        region = request.GET.get('region')
-        month = request.GET.get('month')
+#                 return Response("data Loaded Successfully", status=201)
 
-           
-        if year:
-            data = data.filter(year=year)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=500)
 
-        if parameter:
-            data = data.filter(parameter=parameter)
 
-        if region:
-            data = data.filter(region=region)
-            
-        if month:
-            data = data.filter(month=month)
-   
-        serializer=MonthlySerializer(data,many=True)
+class AtomicViewSet(viewsets.ModelViewSet):
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
-        return Response(serializer.data)
-    
-class SeasonalView(APIView):
-    def get(self,request):
-       
-        data = SeasonalData.objects.all()
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
 
-        year=request.GET.get('year')
-        parameter=request.GET.get('parameter')
-        region=request.GET.get('region')
-        season=request.GET.get('season')
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
-        if year:
-            data = data.filter(year=int(year))
 
-        if parameter:
-            data = data.filter(parameter=str(parameter))
+class MonthlyViewSet(AtomicViewSet):
+    queryset = MonthlyData.objects.select_related("region", "parameter__unit")
+    print(queryset.query)
 
-        if region:
-            data = data.filter(region=str(region))
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return MonthlySerializer
+        return monthlyWriteSerializer
 
-        if season:
-            data = data.filter(season=str(season))
 
-        # if year and season:
-        #     data = data.filter(year=year,season=season)
+class SeasonalViewSet(AtomicViewSet):
+    queryset = SeasonalData.objects.select_related("region", "parameter__unit")
 
-        # if year and region:
-        #     data = data.filter(year=year,region=region)
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return SeasonalSerializer
+        return SeasonalWriteSerializer
 
-        # if region and season:
-        #     data = data.filter(region=region,season=season)
 
-         # if year or parameter:
-        #     data = data.filter(Q(year=year) | Q(parameter=parameter))
-        
+class AnnualViewSet(AtomicViewSet):
+    queryset = AnnualData.objects.select_related("region", "parameter__unit")
 
-        serializer = SeasonalSerializer(data,many=True)
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return AnnualSerializer
+        return AnnualWriteSerializer
 
-        return Response(serializer.data)
-    
 
-class AnnualView(APIView):
-    def get(self,request):
-        data = AnnualData.objects.all()
-        year = request.GET.get('year')
-        parameter = request.GET.get('parameter')
-        region = request.GET.get('region')
-        sort = request.GET.get('sort')
-
-        if year:
-            data = data.filter(year = year)
-
-        if parameter:
-            data = data.filter(parameter=parameter)
-
-        if region:
-            data = data.filter(region = region)
-
-        if sort:
-            data = data.order_by(sort)
-
-        serializer=AnnualSerializer(data,many=True)
-
-        return Response(serializer.data)
-
-    
+def home(request):
+    return render(request, "index.html")
