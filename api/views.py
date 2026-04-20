@@ -57,12 +57,13 @@ def apply_filter(queryset, field, value):
 
 class AtomicViewSet(viewsets.ModelViewSet):
     @transaction.atomic
-    def create(self,request,*args,**kwargs):
-        return super().create(request,*args,**kwargs)
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
     @transaction.atomic
-    def update(self,request,*args,**kwargs):
-        return super().update(request,*args,**kwargs)
-    
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
@@ -70,6 +71,7 @@ class AtomicViewSet(viewsets.ModelViewSet):
 class MonthlyViewSet(AtomicViewSet):
     queryset = MonthlyData.objects.select_related("region", "parameter__unit")
     print(queryset.query)
+
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
             return MonthlySerializer
@@ -78,7 +80,7 @@ class MonthlyViewSet(AtomicViewSet):
 
 class SeasonalViewSet(AtomicViewSet):
     queryset = SeasonalData.objects.select_related("region", "parameter__unit")
-    
+
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
             return SeasonalSerializer
@@ -87,11 +89,12 @@ class SeasonalViewSet(AtomicViewSet):
 
 class AnnualViewSet(AtomicViewSet):
     queryset = AnnualData.objects.select_related("region", "parameter__unit")
-    
+
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
             return AnnualSerializer
         return AnnualWriteSerializer
+
 
 def home(request):
     return render(request, "index.html")

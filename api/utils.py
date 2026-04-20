@@ -63,17 +63,16 @@ def load_data(region_name, parameter_name):
             AnnualData.objects.get_or_create(
                 year=year, region=region, parameter=parameter, defaults={"value": value}
             )
-       
 
     print(f"Data loaded successfully for {region_name} - {parameter_name}")
 
 
-
-
 def get_parameter_obj(parameter_name):
     unit_name = PARAMETER_UNITS.get(parameter_name)
-    unit_obj,_ = Unit.objects.get_or_create(name = unit_name)
-    parameter_obj,created = Parameter.objects.get_or_create(name=parameter_name,defaults={"unit":unit_obj})
+    unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
+    parameter_obj, created = Parameter.objects.get_or_create(
+        name=parameter_name, defaults={"unit": unit_obj}
+    )
 
     if not created and parameter_obj.unit != unit_obj:
         parameter_obj.unit = unit_obj
@@ -90,10 +89,7 @@ def load_parameters():
         unit_name = PARAMETER_UNITS.get(name)
         unit_obj, _ = Unit.objects.get_or_create(name=unit_name)
 
-        Parameter.objects.get_or_create(
-            name=name,
-            defaults={"unit": unit_obj}
-        )
+        Parameter.objects.get_or_create(name=name, defaults={"unit": unit_obj})
 
 
 # def get_monthly_filtered_data(year=None, parameter=None, region=None, month=None):

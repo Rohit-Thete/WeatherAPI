@@ -26,18 +26,22 @@ class monthlyWriteSerializer(serializers.ModelSerializer):
 
         month = data.get("month")
         if month is not None and month not in [m[0] for m in MONTH_CHOICES]:
-            raise serializers.ValidationError({f'enter valid Month from {MONTH_CHOICES}'})
+            raise serializers.ValidationError(
+                {"month":f"enter valid Month from {MONTH_CHOICES}"}
+            )
 
         parameter = data.get("parameter")
         if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError({f'enter valid parameter from {PARAMETER_CHOICES}'})
+            raise serializers.ValidationError(
+                {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
+            )
 
         return data
 
     def create(self, validated_data):
 
-
         from .service import create_or_update_monthlydata
+
         return create_or_update_monthlydata(validated_data)
         # month_value = validated_data.get("month")
         # value = validated_data.get("value")
@@ -71,8 +75,9 @@ class monthlyWriteSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
 
-        from .service import create_or_update_monthlydata
-        return create_or_update_monthlydata(validated_data)
+        from .service import update_monthly_data
+
+        return update_monthly_data(instance,validated_data)
 
         # if "region" in validated_data:
         #     region_obj, _ = Region.objects.get_or_create(
@@ -125,17 +130,22 @@ class SeasonalWriteSerializer(serializers.ModelSerializer):
 
         season = data.get("season")
         if season is not None and season not in [s[0] for s in SEASON_CHOICES]:
-            raise serializers.ValidationError({f'enter valid Season from {SEASON_CHOICES}'})
+            raise serializers.ValidationError(
+                {"season":f"enter valid Season from {SEASON_CHOICES}"}
+            )
 
         parameter = data.get("parameter")
         if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError({f'enter valid parameter from {PARAMETER_CHOICES}'})
+            raise serializers.ValidationError(
+                {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
+            )
 
         return data
 
     def create(self, validated_data):
 
         from .service import create_or_update_seasonaldata
+
         return create_or_update_seasonaldata(validated_data)
 
         # year = validated_data.get("year")
@@ -167,10 +177,10 @@ class SeasonalWriteSerializer(serializers.ModelSerializer):
 
         # return obj
 
+    def update(self, instance, validated_data):
+        from .service import update_seasonal_data
 
-    def update(self,instance,validated_data):
-        from .service import create_or_update_seasonaldata
-        return create_or_update_seasonaldata(validated_data)
+        return update_seasonal_data(instance,validated_data)
 
 
 class AnnualSerializer(serializers.ModelSerializer):
@@ -195,15 +205,17 @@ class AnnualWriteSerializer(serializers.ModelSerializer):
 
         parameter = data.get("parameter")
         if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError({f'enter valid parameter from {PARAMETER_CHOICES}'})
+            raise serializers.ValidationError(
+                {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
+            )
 
         return data
 
     def create(self, validated_data):
 
         from .service import create_or_update_annualdata
-        return create_or_update_annualdata(validated_data)
 
+        return create_or_update_annualdata(validated_data)
 
         # year = validated_data.get("year")
         # value = validated_data.get("value")
@@ -219,6 +231,7 @@ class AnnualWriteSerializer(serializers.ModelSerializer):
 
         # return obj
 
-    def update(self,instance,validated_data):
-        from .service import create_or_update_annualdata
-        return create_or_update_annualdata(validated_data)
+    def update(self, instance, validated_data):
+        from .service import update_annual_data
+
+        return update_annual_data(instance,validated_data)

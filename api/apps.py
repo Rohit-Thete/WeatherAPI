@@ -1,7 +1,7 @@
-
 import threading
 import os
 from django.apps import AppConfig
+
 
 class ApiConfig(AppConfig):
     name = "api"
@@ -17,13 +17,20 @@ class ApiConfig(AppConfig):
         from .models import MonthlyData, SeasonalData, AnnualData
         from .utils import load_data
 
-        REGIONS = ["UK", "England", "Scotland", "Wales", "Northern_Ireland", "England_and_Wales"]
+        REGIONS = [
+            "UK",
+            "England",
+            "Scotland",
+            "Wales",
+            "Northern_Ireland",
+            "England_and_Wales",
+        ]
         PARAMETERS = ["Tmax", "Tmin", "Sunshine", "Rainfall"]
 
         if (
-            MonthlyData.objects.exists() or
-            SeasonalData.objects.exists() or
-            AnnualData.objects.exists()
+            MonthlyData.objects.exists()
+            or SeasonalData.objects.exists()
+            or AnnualData.objects.exists()
         ):
             print("Data already exists, skipping...")
             return
