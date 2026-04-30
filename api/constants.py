@@ -80,3 +80,14 @@ UNIT_CHOICES = [
         "hpa",
     ),
 ]
+
+REGIONS = [
+    "UK",
+    "England",
+    "Scotland",
+    "Wales",
+    "Northern_Ireland",
+    "England_and_Wales",
+]
+
+PARAMETERS = ["Tmax", "Tmin", "Sunshine", "Rainfall"]
