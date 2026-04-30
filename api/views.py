@@ -10,25 +10,29 @@ from .serializers import (
     AnnualWriteSerializer,
 )
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from .constants import REGIONS, PARAMETERS
+from .utils import load_data
+from rest_framework.response import Response
 
 
-# class LoadData(APIView):
-#     def post(self, request):
+class LoadData(APIView):
+    def post(self, request):
 
-#         try:
-#             if (
-#                 MonthlyData.objects.count() == 0
-#                 and SeasonalData.objects.count() == 0
-#                 and AnnualData.objects.count() == 0
-#             ):
-#                 for i in REGIONS:
-#                     for j in PARAMETERS:
-#                         load_data(i, j)
+        try:
+            if (
+                MonthlyData.objects.count() == 0
+                and SeasonalData.objects.count() == 0
+                and AnnualData.objects.count() == 0
+            ):
+                for i in REGIONS:
+                    for j in PARAMETERS:
+                        load_data(i, j)
 
-#                 return Response("data Loaded Successfully", status=201)
+                return Response("data Loaded Successfully", status=201)
 
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=500)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
 
 class MonthlyViewSet(viewsets.ModelViewSet):
