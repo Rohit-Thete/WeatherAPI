@@ -1,7 +1,15 @@
 from rest_framework import serializers
 from .models import MonthlyData, SeasonalData, AnnualData, Region, Parameter, Unit
 from .constants import MONTH_CHOICES, PARAMETER_CHOICES, SEASON_CHOICES, PARAMETER_UNITS
-from .service import get_parameter_obj, get_region_obj
+from .service import get_or_create_parameter_obj, get_or_create_region_obj
+
+
+class ReadRepresentationMixin:
+    read_serializer_class = None
+
+    def to_representation(self, instance):
+        serializer = self.read_serializer_class(instance, context=self.context)
+        return serializer.data
 
 
 class MonthlySerializer(serializers.ModelSerializer):
@@ -14,9 +22,10 @@ class MonthlySerializer(serializers.ModelSerializer):
         fields = ["year", "region", "month", "value", "parameter", "unit"]
 
 
-class monthlyWriteSerializer(serializers.ModelSerializer):
+class MonthlyWriteSerializer(ReadRepresentationMixin, serializers.ModelSerializer):
+    read_serializer_class = MonthlySerializer
     region = serializers.CharField()
-    parameter = serializers.CharField()
+    parameter = serializers.ChoiceField(choices=PARAMETER_CHOICES)
 
     class Meta:
         model = MonthlyData
@@ -30,11 +39,11 @@ class monthlyWriteSerializer(serializers.ModelSerializer):
                 {"month":f"enter valid Month from {MONTH_CHOICES}"}
             )
 
-        parameter = data.get("parameter")
-        if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError(
-                {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
-            )
+        # parameter = data.get("parameter")
+        # if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
+        #     raise serializers.ValidationError(
+        #         {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
+        #     )
 
         return data
 
@@ -118,9 +127,10 @@ class SeasonalSerializer(serializers.ModelSerializer):
         fields = ["year", "region", "season", "value", "parameter", "unit"]
 
 
-class SeasonalWriteSerializer(serializers.ModelSerializer):
+class SeasonalWriteSerializer(ReadRepresentationMixin, serializers.ModelSerializer):
+    read_serializer_class = SeasonalSerializer
     region = serializers.CharField()
-    parameter = serializers.CharField()
+    parameter = serializers.ChoiceField(choices=PARAMETER_CHOICES)
 
     class Meta:
         model = SeasonalData
@@ -134,11 +144,11 @@ class SeasonalWriteSerializer(serializers.ModelSerializer):
                 {"season":f"enter valid Season from {SEASON_CHOICES}"}
             )
 
-        parameter = data.get("parameter")
-        if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError(
-                {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
-            )
+        # parameter = data.get("parameter")
+        # if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
+        #     raise serializers.ValidationError(
+        #         {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
+        #     )
 
         return data
 
@@ -193,9 +203,10 @@ class AnnualSerializer(serializers.ModelSerializer):
         fields = ["year", "region", "value", "parameter", "unit"]
 
 
-class AnnualWriteSerializer(serializers.ModelSerializer):
+class AnnualWriteSerializer(ReadRepresentationMixin, serializers.ModelSerializer):
+    read_serializer_class = AnnualSerializer
     region = serializers.CharField()
-    parameter = serializers.CharField()
+    parameter = serializers.ChoiceField(choices=PARAMETER_CHOICES)
 
     class Meta:
         model = AnnualData
@@ -203,11 +214,11 @@ class AnnualWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
 
-        parameter = data.get("parameter")
-        if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
-            raise serializers.ValidationError(
-                {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
-            )
+        # parameter = data.get("parameter")
+        # if parameter is not None and parameter not in [p[0] for p in PARAMETER_CHOICES]:
+        #     raise serializers.ValidationError(
+        #         {"parameter":f"enter valid parameter from {PARAMETER_CHOICES}"}
+        #     )
 
         return data
 
