@@ -113,6 +113,7 @@ select {
     position: relative;
     overflow: hidden;
     padding: 28px;
+    border-radius: var(--radius);
     color: #eef4ff;
     background:
         radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.14), transparent 20%),
@@ -120,7 +121,7 @@ select {
         linear-gradient(145deg, #11264a 0%, #0d1d38 52%, #071424 100%);
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: 0 34px 80px rgba(8, 18, 36, 0.2);
-}
+}   
 
 .hero-copy::before {
     content: "";
