@@ -79,6 +79,16 @@ class MonthlyTest(TestCase):
         self.assertEqual(response.data["results"][0]["region"], "England")
 
 
+class HomePageTests(TestCase):
+    def test_home_page_renders_frontend(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Climate Atlas")
+        self.assertContains(response, "Data Explorer")
+        self.assertContains(response, "Record Composer")
+
+
 class SeasonalAndAnnualFilterTests(TestCase):
     def setUp(self):
         self.client = APIClient()

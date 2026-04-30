@@ -1,0 +1,279 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="{% static 'api/home.css' %}">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">Weather App</p>
+                <h1>Work with climate records in one place.</h1>
+                <p class="hero-text">
+                    Filter data, inspect trends, and create new observations from one compact dashboard.
+                </p>
+                <div class="hero-actions">
+                    <a class="primary-action" href="#explorer">Browse Records</a>
+                    <a class="secondary-action" href="#composer">Create Record</a>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <div class="hero-panel-intro">
+                    <p class="section-kicker">Snapshot</p>
+                    <h2>Current climate archive</h2>
+                </div>
+                <div class="hero-panel-grid">
+                    <article class="stat-card">
+                        <span class="stat-label">Monthly Records</span>
+                        <strong class="stat-value" id="stat-monthly">{{ stats.monthly }}</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-label">Seasonal Records</span>
+                        <strong class="stat-value" id="stat-seasonal">{{ stats.seasonal }}</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-label">Annual Records</span>
+                        <strong class="stat-value" id="stat-annual">{{ stats.annual }}</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-label">Known Regions</span>
+                        <strong class="stat-value" id="stat-regions">{{ stats.regions }}</strong>
+                    </article>
+                </div>
+
+                <div class="route-list">
+                    <p class="route-heading">API routes</p>
+                    <div class="route-links">
+                        <a class="route-chip" href="/monthly/" target="_blank" rel="noreferrer">GET /monthly/</a>
+                        <a class="route-chip" href="/seasonal/" target="_blank" rel="noreferrer">GET /seasonal/</a>
+                        <a class="route-chip" href="/annual/" target="_blank" rel="noreferrer">GET /annual/</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="panel explorer-panel" id="explorer">
+                <div class="panel-header">
+                    <div>
+                        <p class="section-kicker">Data Explorer</p>
+                        <h2>Query the API with friendly filters</h2>
+                    </div>
+                    <div class="dataset-switch" id="dataset-switch" role="tablist" aria-label="Dataset selector">
+                        <button class="dataset-pill is-active" type="button" data-dataset="monthly">Monthly</button>
+                        <button class="dataset-pill" type="button" data-dataset="seasonal">Seasonal</button>
+                        <button class="dataset-pill" type="button" data-dataset="annual">Annual</button>
+                    </div>
+                </div>
+
+                <form class="control-grid" id="filter-form">
+                    <div class="field">
+                        <label for="filter-year">Year</label>
+                        <input id="filter-year" name="year" type="number" min="1000" max="9999" placeholder="e.g. 2024">
+                    </div>
+
+                    <div class="field">
+                        <label for="filter-region">Region</label>
+                        <input id="filter-region" name="region" type="text" list="region-options" placeholder="England">
+                    </div>
+
+                    <div class="field">
+                        <label for="filter-parameter">Parameter</label>
+                        <select id="filter-parameter" name="parameter">
+                            <option value="">Any parameter</option>
+                            {% for parameter in parameter_choices %}
+                            <option value="{{ parameter }}">{{ parameter }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field" id="filter-month-field">
+                        <label for="filter-month">Month</label>
+                        <select id="filter-month" name="month">
+                            <option value="">Any month</option>
+                            {% for month in month_choices %}
+                            <option value="{{ month }}">{{ month|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field is-hidden" id="filter-season-field">
+                        <label for="filter-season">Season</label>
+                        <select id="filter-season" name="season">
+                            <option value="">Any season</option>
+                            {% for season in season_choices %}
+                            <option value="{{ season }}">{{ season|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="control-actions">
+                        <button class="primary-button" type="submit">Search</button>
+                        <button class="ghost-button" type="button" id="reset-filters">Reset</button>
+                    </div>
+                </form>
+
+                <div class="results-toolbar">
+                    <div class="results-insights">
+                        <p class="results-summary" id="results-summary">Loading monthly records...</p>
+                        <div class="average-chip" id="average-chip">
+                            <span class="average-chip-label">Page Average</span>
+                            <strong class="average-chip-value" id="average-value">Loading...</strong>
+                            <span class="average-chip-meta" id="average-meta">Waiting for records</span>
+                        </div>
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="ghost-button" type="button" id="previous-page" disabled>Previous</button>
+                        <button class="ghost-button" type="button" id="next-page" disabled>Next</button>
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="results-table-wrap">
+                        <table class="results-table">
+                            <thead id="results-head"></thead>
+                            <tbody id="results-body"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <p class="section-kicker">Visual Summary</p>
+                                <h3 id="chart-title">Current page trend</h3>
+                            </div>
+                            <span class="chart-badge" id="chart-badge">monthly</span>
+                        </div>
+
+                        <div class="chart-block">
+                            <div class="chart-copy">
+                                <p class="chart-caption" id="trend-caption">Loading trend graph...</p>
+                            </div>
+                            <div class="chart-frame">
+                                <svg
+                                    id="trend-chart"
+                                    class="chart-surface"
+                                    viewBox="0 0 480 240"
+                                    role="img"
+                                    aria-label="Trend graph"
+                                ></svg>
+                                <div class="chart-tooltip is-hidden" id="trend-tooltip" aria-hidden="true"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-block chart-block-secondary">
+                            <div class="chart-copy">
+                                <p class="chart-caption" id="comparison-caption">Loading comparison graph...</p>
+                            </div>
+                            <div class="chart-frame">
+                                <svg
+                                    id="comparison-chart"
+                                    class="chart-surface"
+                                    viewBox="0 0 480 220"
+                                    role="img"
+                                    aria-label="Comparison graph"
+                                ></svg>
+                                <div
+                                    class="chart-tooltip is-hidden"
+                                    id="comparison-tooltip"
+                                    aria-hidden="true"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="panel composer-panel" id="composer">
+                <div class="panel-header">
+                    <div>
+                        <p class="section-kicker">Record Composer</p>
+                        <h2>Send a new observation</h2>
+                    </div>
+                </div>
+
+                <form id="create-form" class="composer-form">
+                    {% csrf_token %}
+                    <div class="field">
+                        <label for="create-dataset">Dataset</label>
+                        <select id="create-dataset" name="dataset">
+                            <option value="monthly">Monthly</option>
+                            <option value="seasonal">Seasonal</option>
+                            <option value="annual">Annual</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="create-year">Year</label>
+                        <input id="create-year" name="year" type="number" min="1000" max="9999" placeholder="2024" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="create-region">Region</label>
+                        <input id="create-region" name="region" type="text" list="region-options" placeholder="England" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="create-parameter">Parameter</label>
+                        <select id="create-parameter" name="parameter" required>
+                            {% for parameter in parameter_choices %}
+                            <option value="{{ parameter }}">{{ parameter }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field" id="create-month-field">
+                        <label for="create-month">Month</label>
+                        <select id="create-month" name="month">
+                            {% for month in month_choices %}
+                            <option value="{{ month }}">{{ month|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field is-hidden" id="create-season-field">
+                        <label for="create-season">Season</label>
+                        <select id="create-season" name="season">
+                            {% for season in season_choices %}
+                            <option value="{{ season }}">{{ season|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="create-value">Value</label>
+                        <input id="create-value" name="value" type="number" step="0.01" placeholder="8.5" required>
+                    </div>
+
+                    <button class="primary-button full-width" type="submit">Save Record</button>
+                </form>
+
+                <div class="status-card" id="submit-status" data-state="idle">
+                    Choose a dataset, fill the form, and submit to post directly into the API.
+                </div>
+
+                <div class="response-card">
+                    <div class="json-card-header">
+                        <p class="section-kicker">Latest Write Response</p>
+                    </div>
+                    <pre id="create-response">No write request sent yet.</pre>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <datalist id="region-options">
+        {% for region in region_suggestions %}
+        <option value="{{ region }}"></option>
+        {% endfor %}
+    </datalist>
+
+    {{ app_config|json_script:"app-config" }}
+    <script src="{% static 'api/home.js' %}" defer></script>
+</body>
+</html>
