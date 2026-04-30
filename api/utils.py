@@ -21,10 +21,22 @@ def load_data(region_name, parameter_name):
     response = requests.get(url)
     lines = response.text.splitlines()
 
+    # 🔹 batches
+    monthly_batch = []
+    seasonal_batch = []
+    annual_batch = []
+
+    batch_size = 1000
+
+    # 🔹 preload existing (for resume)
+    existing_monthly = set(
+        MonthlyData.objects.filter(region=region, parameter=parameter)
+        .values_list("year", "month")
+    )
+
     for line in lines:
         col = line.split()
 
-        # Skip invalid rows
         if len(col) < 17:
             continue
         if not col[0].isdigit():
@@ -32,39 +44,87 @@ def load_data(region_name, parameter_name):
 
         year = int(col[0])
 
-        # MONTHLY DATA
+        # 🔥 MONTHLY
         for i in range(12):
             value = None if col[i + 1] == "---" else float(col[i + 1])
-            if value is not None:
-                MonthlyData.objects.get_or_create(
+
+            if value is None:
+                continue
+
+            key = (year, MONTHS[i])
+
+            if key in existing_monthly:
+                continue
+
+            monthly_batch.append(
+                MonthlyData(
                     year=year,
                     region=region,
                     parameter=parameter,
                     month=MONTHS[i],
-                    defaults={"value": value},
+                    value=value,
                 )
+            )
 
-        # SEASONAL DATA
+            existing_monthly.add(key)
+
+        # 🔥 SEASONAL
         for i in range(4):
             value = None if col[13 + i] == "---" else float(col[13 + i])
-            if value is not None:
-                SeasonalData.objects.get_or_create(
+
+            if value is None:
+                continue
+
+            seasonal_batch.append(
+                SeasonalData(
                     year=year,
                     region=region,
                     parameter=parameter,
                     season=SEASONS[i],
-                    defaults={"value": value},
+                    value=value,
                 )
-
-        # ANNUAL DATA
-        annual_value = col[17]
-        value = None if annual_value == "---" else float(annual_value)
-        if value is not None:
-            AnnualData.objects.get_or_create(
-                year=year, region=region, parameter=parameter, defaults={"value": value}
             )
 
-    print(f"Data loaded successfully for {region_name} - {parameter_name}")
+        # 🔥 ANNUAL
+        annual_value = col[17]
+        value = None if annual_value == "---" else float(annual_value)
+
+        if value is not None:
+            annual_batch.append(
+                AnnualData(
+                    year=year,
+                    region=region,
+                    parameter=parameter,
+                    value=value,
+                )
+            )
+
+        # 🔹 BULK INSERT (monthly)
+        if len(monthly_batch) >= batch_size:
+            MonthlyData.objects.bulk_create(monthly_batch, ignore_conflicts=True)
+            monthly_batch.clear()
+
+        # 🔹 BULK INSERT (seasonal)
+        if len(seasonal_batch) >= batch_size:
+            SeasonalData.objects.bulk_create(seasonal_batch, ignore_conflicts=True)
+            seasonal_batch.clear()
+
+        # 🔹 BULK INSERT (annual)
+        if len(annual_batch) >= batch_size:
+            AnnualData.objects.bulk_create(annual_batch, ignore_conflicts=True)
+            annual_batch.clear()
+
+    # 🔹 FINAL INSERT
+    if monthly_batch:
+        MonthlyData.objects.bulk_create(monthly_batch, ignore_conflicts=True)
+
+    if seasonal_batch:
+        SeasonalData.objects.bulk_create(seasonal_batch, ignore_conflicts=True)
+
+    if annual_batch:
+        AnnualData.objects.bulk_create(annual_batch, ignore_conflicts=True)
+
+    print(f"✅ Data loaded successfully for {region_name} - {parameter_name}")
 
 
 def get_parameter_obj(parameter_name):
