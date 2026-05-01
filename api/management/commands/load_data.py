@@ -16,6 +16,7 @@ PARAMETERS = ["Tmax", "Tmin", "Sunshine", "Rainfall"]
 class Command(BaseCommand):
     help = "Load weather data for all regions and parameters"
 
+
     def handle(self, *args, **kwargs):
 
         if (
