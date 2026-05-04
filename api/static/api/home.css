@@ -129,7 +129,7 @@ select {
     inset: auto -80px -80px auto;
     width: 220px;
     height: 220px;
-    border-radius: 50%;
+    border-radius: var(--radius);
     background: radial-gradient(circle, rgba(31, 186, 214, 0.42), transparent 68%);
 }
 
@@ -139,7 +139,7 @@ select {
     inset: 26px auto auto 26px;
     width: 92px;
     height: 92px;
-    border-radius: 50%;
+    border-radius: var(--radius);
     border: 1px solid rgba(255, 255, 255, 0.12);
     opacity: 0.7;
 }
