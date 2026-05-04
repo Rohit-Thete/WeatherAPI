@@ -17,7 +17,7 @@
     --line-strong: rgba(16, 24, 42, 0.14);
     --shadow: 0 30px 70px rgba(8, 18, 36, 0.1);
     --shadow-soft: 0 14px 36px rgba(16, 24, 42, 0.06);
-    --radius: 26px;
+    --radius: 32px;
 }
 
 * {
